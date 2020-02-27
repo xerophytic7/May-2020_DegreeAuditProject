@@ -1,5 +1,5 @@
 require 'sinatra'
-require_relative "user.rb"
+require_relative "User.rb"
 
 enable :sessions
 
@@ -13,9 +13,7 @@ end
 post "/process_login" do
   email = params[:email]
   password = params[:password]
-
   user = User.first(email: email.downcase)
-
   if(user && user.login(password))
     session[:user_id] = user.id
     redirect "/dashboard"
@@ -35,22 +33,20 @@ end
 post "/register" do
   email = params[:email]
   password = params[:password]
-  # _Name = params[:Name]
-  supervisor = params[:Supervisor]
-  administrator = params[:Administrator]
-  employee = params[:Employee]
+  FirstName = params[:FirstName]
+  LastName = params[:LastName]
+  #administrator = params[:Administrator]
+
   u = User.new
-  # u.Name = _Name
+  u.first_Name= FirstName
+  u.last_Name = LastName
   u.email = email.downcase
   u.password =  password
-  if administrator
-    u.Admin = true
+  if admin
+    u.admin = true
   end
-
   u.save
-
   #session[:user_id] = u.id
-
   erb :"authentication/successful_signup"
 
 end
