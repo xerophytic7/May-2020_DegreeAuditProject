@@ -1,7 +1,7 @@
 require 'data_mapper'
 
 if ENV['DATABASE_URL']
-  DataMapper::setup(:default, ENV['DATABASE_URL'] || 'postgres://localhost/mydb')
+  DataMapper::setup(:default, ENV['DATABASE_URL'] || 'postgres://localhost/student')
 else
   DataMapper::setup(:default, "sqlite3://#{Dir.pwd}/student.db")
 end
@@ -10,14 +10,14 @@ class User
   include DataMapper::Resource
   property :UserID, Integer
   property :first_Name, String
-  property :fast_Name, String
+  property :last_Name, String
   property :email, String
   property :password, String
   property :GPA, Float
   property :catalog_Year, Integer
   property :classification, String
   property :hours, Integer
-  property :Admin, Boolean, :default => false
+  property :admin, Boolean, :default => false
 
   def login(password)
     return self.password == password
