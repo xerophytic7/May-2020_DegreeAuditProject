@@ -8,16 +8,18 @@ end
 
 class User
   include DataMapper::Resource
-  property :UserID, Integer
-  property :first_Name, String
-  property :last_Name, String
-  property :email, String
-  property :password, String
+  property :UserID, primary_key
+  property :Email, String
+  property :FirstName, String
+  property :LastName, String
+  property :Password, String
   property :GPA, Float
-  property :catalog_Year, Integer
+  property :CatalogYear, Integer
   property :classification, String
-  property :hours, Integer
-  property :admin, Boolean, :default => false
+  property :Hours, Integer
+  property :IsAdmin, Boolean, :default => false
+  property :AdvancedHours, Integer
+  property :Advanced_CS_Hours, Integer
 
   def login(password)
     return self.password == password

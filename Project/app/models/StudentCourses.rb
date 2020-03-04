@@ -7,9 +7,11 @@ else
 end
 
 class StudentCourses
-  property :StudentID, Integer
+  property :UserID, Integer
   property :CourseID, Integer
   property :SemesterID, Integer
+  property :Grade, String
+
 end
 
 DataMapper.finalize

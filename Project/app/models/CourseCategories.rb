@@ -7,10 +7,8 @@ else
 end
 
 class CourseCategories
+  property :CourseID, Integer
   property :CategoryID, Integer
-  property :CategoryNum, Integer
-  property :CategoryName, String
-  property :RegHours, Integer
 end
 
 DataMapper.finalize

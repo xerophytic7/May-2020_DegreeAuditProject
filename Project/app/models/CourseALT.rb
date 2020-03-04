@@ -8,7 +8,7 @@ end
 
 class CourseALT
   property :CourseID, Integer
-  property :AlternativeID, Integer
+  property :AltID, Integer
 end
 
 DataMapper.finalize

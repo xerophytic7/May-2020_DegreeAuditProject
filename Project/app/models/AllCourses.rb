@@ -8,12 +8,11 @@ end
 
 class AllCourses
   include DataMapper::Resource
-  property :CourseID, Integer
+  property :CourseID, primary_key
   property :CourseDept, String
   property :CourseNum, Integer
   property :Name, String
-  property :Category, String
-  property :CatalogYear, Integer
+  property :Institution, String
 end
 
 DataMapper.finalize
