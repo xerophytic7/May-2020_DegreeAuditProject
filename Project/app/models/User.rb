@@ -15,7 +15,7 @@ class User
   property :Password, String
   property :GPA, Float
   property :CatalogYear, Integer
-  property :classification, String
+  property :Classification, String
   property :Hours, Integer
   property :IsAdmin, Boolean, :default => false
   property :AdvancedHours, Integer

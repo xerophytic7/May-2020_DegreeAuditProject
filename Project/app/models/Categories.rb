@@ -10,6 +10,7 @@ class Categories
   property :CategoryID, primary_key
   property :CategoryNum, Integer
   property :CategoryName, String
+  property :CatalogYear, Integer
   property :ReqHours, Integer
 end
 
