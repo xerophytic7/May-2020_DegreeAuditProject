@@ -48,3 +48,16 @@ end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
+
+#addedby HS
+gem 'sinatra'
+gem 'data_mapper'
+gem 'sinatra-flash'
+gem 'json'
+gem 'jwt'
+gem 'rerun'
+
+group :development do
+  gem "sqlite3-ruby"
+  gem "dm-sqlite-adapter"
+end
