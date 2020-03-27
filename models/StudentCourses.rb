@@ -1,12 +1,10 @@
 require 'data_mapper'
 
-if ENV['DATABASE_URL']
-  DataMapper::setup(:default, ENV['DATABASE_URL'] || 'postgres://localhost/StudentCourses')
-else
-  DataMapper::setup(:default, "sqlite3://#{Dir.pwd}/StudentCourses.db")
-end
 
 class StudentCourses
+  include DataMapper::Resource
+
+  property :id, Serial
   property :UserID, Integer
   property :CourseID, Integer
   property :SemesterID, Integer
@@ -15,10 +13,6 @@ class StudentCourses
   property :Notes, String
 
 end
-
-DataMapper.finalize
-StudentCourses.auto_upgrade!
-
 
 
 

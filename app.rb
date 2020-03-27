@@ -1,59 +1,149 @@
 require "sinatra"
-require_relative 'models/'
+require "sinatra/namespace"
 require_relative "api_authentication.rb"
 require "json"
+require File.expand_path("../models/AllCourses.rb", __FILE__)
+require File.expand_path("../models/User.rb", __FILE__)
+require File.expand_path("../models/Categories.rb", __FILE__)
+require File.expand_path("../models/CourseALT.rb", __FILE__)
+require File.expand_path("../models/CourseCategories.rb", __FILE__)
+require File.expand_path("../models/CoursePreREQ.rb", __FILE__)
+require File.expand_path("../models/PlannedFutureCourses.rb", __FILE__)
+require File.expand_path("../models/StudentCourses.rb", __FILE__)
 
+#require_relative 'models/User.rb'
+#require_relative 'models/Categories.rb'
+#require_relative 'models/CourseALT.rb'
+#require_relative 'models/CourseCategories.rb'
+#require_relative 'models/CoursePreREQ.rb'
+#require_relative 'models/PlannedFutureCourses.rb'
+#require_relative 'models/StudentCourses.rb'
+
+if ENV['DATABASE_URL']
+  DataMapper::setup(:default, ENV['DATABASE_URL'] || 'postgres://localhost//mydb')
+else
+  DataMapper::setup(:default, "sqlite3://#{Dir.pwd}/app.db")
+end
+
+DataMapper.finalize
+
+User.auto_upgrade!
+PlannedFutureCourses.auto_upgrade!
+CourseALT.auto_upgrade!
+CourseCategories.auto_upgrade!
+CoursePreREQ.auto_upgrade!
+StudentCourses.auto_upgrade!
+AllCourses.auto_upgrade!
+Categories.auto_upgrade!
 
 #If there is no admin account, make one.
-if User.all(admin: true).count == 0
-	u = User.new
-	u.UserID = 01234567
-	u.Email = "admin@admin.com"
-	u.Password = "admin"
-	u.IsAdmin = true
-	u.save
-  
-	print u.UserID
+post '/createAdmin' do
+
+  if User.all(admin: true).count == 0
+    u = User.new
+    u.id = 1337
+    u.Email = "admin@admin.com"
+    u.Password = "admin"
+    u.admin = true
+    u.save
+    return u.to_json
+    halt 200, {"message": "Admin account created"}.to_json
+  else
+  halt 422, {"message": "Admin account already exists"}.to_json
   end
+end
+
+     # TEST # Create user with custom serial id
+     post '/customid' do
+      username = params["username"]
+    password = params["password"]
+    fn = params["firstName"]
+    ln = params["lastName"]
+    id = params["id"]
+    if username && password
+      user = User.first(Email: username.downcase)
   
+      if(user)
+          halt 422, {"message": "Username already in use"}.to_json
+      else
+        if fn && ln && id
+          u = User.new
+          u.FirstName = fn
+          u.LastName = ln
+          u.Email = username.downcase
+          u.Password = password
+          u.id = id
+          u.save
+          halt 201, {"message": "Account successfully registered"}.to_json
+        else
+          message = "Missing First or Last Name or ID"
+          halt 400, {"message": message}.to_json
+        end
+      end
+    else
+      message = "Missing username or password"
+      halt 400, {"message": message}.to_json
+    end
+    end
+    
+    #test add 10 regular users if there's less than 3 users
+    get '/test' do
+      api_authenticate!
   
-  #adding some random users
-  if User.count < 40
+    if User.count < 3
+    
+      i = 1
+      last = 11
+      
+      while i < last do
+        u = User.new
+        u.id = i + 9999
+        u.Email = "email#{i}@email.com"
+        u.FirstName = "user#{i}"
+        u.Password = "pw#{i}"
+        u.save
+        i += 1
+      
+        print u.id
+        print u.Email
+        print u.FirstName
+        print u.Password
+      
+      end
+      
+      return "Created 10 users"
+      end
+      return "Current Users: #{User.count}"
+    
+    end
+
+    #test delete all non admin users
+    delete '/allUsers' do
+      u = User.all(admin: false)
+      u.destroy
+
+      if User.count == 1
+        halt 200, {message: "All Users Successfully deleted"}.to_json
+      else
+        halt 400, {message: "Unable to delete all users"}.to_json
+      end
+    end
   
-	i = 1
-	last = 51
+    #Test user authentication
+    get '/test_authentication' do
+      api_authenticate!
   
-	while i < last do
-	  u = User.new
-	  u.Email = "email#{i}@email.com"
-	  u.FirstName = "user#{i}"
-	  u.Password = "pw#{i}"
-	  u.save
-	  i += 1
+      halt 200, {message: "User Authentication passed."}.to_json
+    end  
   
-	  print u.UserID
-	  print u.Email
-	  print u.FirstName
-	  print u.Password
-  
-	end
-  
-  
-  end
-  
-  
+
   ############## CREATE ################
-  
-  
-  #test get
-  get '/test'do
-  
-	return "hello"
-  
-  end
-  
-  # Create Users Given Email, FirstName, LastName, Password, and isAdmin (true/false).
-  
+
+
+ 
+  # Create Users Given Email, FirstName, LastName, Password, and admin (true/false).
+  #****ALREADY IMPLEMENTED IN ***
+  #     api_authentication.rb
   
   # Create entry to StudentCourses using current UserID
   # (Depending on params given)
@@ -129,6 +219,12 @@ if User.all(admin: true).count == 0
   # Read existing catalog years
   #(Possibly need new table to list catalog years quicker, for drop down menus)
   
+
+  #TEST READ ALL USERS
+  get '/printAllUsers' do
+    return User.all.to_json
+
+  end
   
   ############## UPDATE ################
   

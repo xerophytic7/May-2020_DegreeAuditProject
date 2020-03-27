@@ -1,7 +1,7 @@
 require 'jwt'
 require "json"
 
-SECRET_KEY = "lasjdflajsdlfkjasldkfjalksdjflk"
+SECRET_KEY = "laUU^%D&IYTV5&^f8^%D7iF865D&687686eIVjflk"
 
 def api_authenticate!
 	@api = true
@@ -50,7 +50,7 @@ get "/api/login" do
 	username = params["username"]
 	password = params["password"]
 	if username && password
-		user = User.first(email: username.downcase)
+		user = User.first(Email: username.downcase)
 
 		if(user && user.login(password))
 			content_type :json
@@ -68,17 +68,27 @@ end
 post "/api/register" do
 	username = params["username"]
 	password = params["password"]
+	fn = params["firstName"]
+	ln = params["lastName"]
+
 	if username && password
-		user = User.first(email: username.downcase)
+		user = User.first(Email: username.downcase)
 
 		if(user)
 				halt 422, {"message": "Username already in use"}.to_json
 		else
+			if fn && ln
 				u = User.new
-				u.email = username.downcase
-				u.password = password
+				u.FirstName = fn
+				u.LastName = ln
+				u.Email = username.downcase
+				u.Password = password
 				u.save
 				halt 201, {"message": "Account successfully registered"}.to_json
+			else
+				message = "Missing First or Last Name"
+				halt 400, {"message": message}.to_json
+			end
 		end
 	else
 		message = "Missing username or password"

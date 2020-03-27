@@ -3,6 +3,8 @@ gem 'sinatra'
 gem 'data_mapper'
 gem 'jwt'
 gem 'activesupport'
+gem 'require_all'
+gem 'sinatra-namespace'
 
 group :development do
   gem "sqlite3-ruby"
