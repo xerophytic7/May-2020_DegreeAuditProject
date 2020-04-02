@@ -5,9 +5,9 @@ require 'data_mapper'
 class PlannedFutureCourses
   include DataMapper::Resource
 
-  property :id, Serial
-  property :UserID, Integer
-  property :CourseID, Integer
+ # property :id, Serial
+  property :UserID, Integer, :key=> true
+  property :CourseID, Integer, :key=> true
   property :SemesterID, Integer
 end
 
