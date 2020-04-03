@@ -1,7 +1,7 @@
 require 'data_mapper'
 
 
-class StudentCourse
+class StudentCourses
   include DataMapper::Resource
 
   #property :id, Serial

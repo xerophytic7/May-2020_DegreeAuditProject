@@ -28,11 +28,11 @@ end
 DataMapper.finalize
 
 User.auto_upgrade!
-PlannedFutureCourse.auto_upgrade!
+PlannedFutureCourses.auto_upgrade!
 CourseALT.auto_upgrade!
 CourseCategories.auto_upgrade!
 CoursePreREQ.auto_upgrade!
-StudentCourse.auto_upgrade!
+StudentCourses.auto_upgrade!
 AllCourses.auto_upgrade!
 Categories.auto_upgrade!
 
@@ -150,11 +150,50 @@ def same_catalog_year courseid, userid
     return true
   end
 end
+#IN CASE WE NEED TO CHECK IF GIVEN SEMESTER IS VALID
+semesters = ["fall", "spring", "summer i", "summer ii"]
+def valid_semester semester
+  semester.split
+  if semester.length !=2
+    return false
+  end
+  if semesters.count semester[0].downcase != 1
+    return false
+  end
+  if semester[1].to_i < 1927 && semester[1].to_i > Time.new.year
+    return false
+  end
+  return true
+end
 
 ############## CREATE ################
 
+  # Create Courses given params CourseDept, CourseNum, Name, and Institution
+  post '/add/Course' do
+    api_authenticate!
+    if !current_user.admin
+      halt 401, {"message": "Unauthorized user"}.to_json
+    end
+    params["CourseDept"] ? (CourseDept = params["CourseDept"]) : (halt 400, {"message": "Missing Paramaters"}.to_json)
+    params["CourseNum"] ? (CourseNum = params["CourseNum"]) : (halt 400, {"message": "Missing Paramaters"}.to_json)
+    params["Name"] ? (name = params["Name"]) : (halt 400, {"message": "Missing Paramaters"}.to_json)
+    params["Institution"] ? (Institution = params["Institution"]) : (halt 400, {"message": "Missing Paramaters"}.to_json)
 
- 
+    if CourseDept != '' && CourseNum != '' && name != '' && Institution != ''
+      c = AllCourses.new
+      c.CourseDept = CourseDept
+      c.CourseNum = CourseNum
+      c.Name = name
+      c.Institution = Institution
+      c.save
+
+      halt 200, {"message": "Successfully added course to AllCourses Table"}.to_json
+    else
+      halt 400, {"message": "Missing Paramaters"}.to_json
+    end
+
+  end
+  
   # Create Users Given Email, FirstName, LastName, Password, and admin (true/false).
   #****ALREADY IMPLEMENTED IN ***
   #     api_authentication.rb
@@ -164,18 +203,18 @@ end
   post '/add/StudentCourses' do
     api_authenticate!
     userid = params['UserID']
-    courseid = params['CourseID']
-    semester = params['Semester']
-    grade = params['Grade']
+    params["CourseID"] ? (courseid = params['CourseID']): (halt 400, {"message": "Missing CourseID paramater"}.to_json)
+    params["Semester"] ? (semester = params['Semester']): (halt 400, {"message": "Missing Semester paramater"}.to_json)
+    params["Grade"] ? (grade = params['Grade']): (halt 400, {"message": "Missing Grade paramater"}.to_json)
     notes = params['Notes']
-    if courseid && semester && grade
+    if courseid != '' && semester != '' && grade != ''
       if userid
         if current_user.admin
           # I COULD CHECK IF COURSE CATALOG YEAR MATCHES USER CATALOG YEAR
           # if same_catalog_year(courseid, userid)    
           # BUT NOT SURE WHY WE'D NEED THIS CHECK HERE
-          c = StudenCourses.new
-          c.UserID = userid
+          c = StudentCourses.new
+          userid != '' ? (c.UserID = userid) : (halt 400, {"message": "Missing UserID paramater"}.to_json)
           c.CourseID = courseid
           c.SemesterID = semester
           c.Grade = grade
@@ -191,7 +230,7 @@ end
         # I COULD CHECK IF COURSE CATALOG YEAR MATCHES USER CATALOG YEAR
         # if same_catalog_year(courseid, current_user.id)
         # BUT NOT SURE WHY WE'D NEED THIS CHECK HERE
-        c = StudenCourses.new
+        c = StudentCourses.new
         c.UserID = current_user.id
         c.CourseID = courseid
         c.SemesterID = semester
@@ -211,8 +250,29 @@ end
   # list of courses should have CourseID and Semester. 
   post '/add/PlannedCourses' do
     api_authenticate!
-    courseid = params['CourseID']
-    semester = params['Semester']
+    plannedCourses = params[:Courses]
+    if plannedCourses
+      plannedCourses.each do |i|
+        if i[1]["courseID"] != '' && i[1]["semester"] != ''
+          # if valid_semester(i[1]['semester'])    Checks semester matches spring, fall, summer i, or summer ii
+          next
+        else
+          halt 400, {"message": "Missing CourseID or Semester"}.to_json
+        end 
+      end
+      plannedCourses.each do |i|
+        #puts i[1]["courseID"]
+        #puts i[1]["semester"]
+        p = PlannedFutureCourses.new
+        p.UserID = current_user.id
+        p.CourseID = i[1]["courseID"]
+        p.Semester = i[1]["semester"]
+        p.save
+      end
+        halt 201, {"message": "Courses added to Planned courses successfully"}.to_json
+    else
+      halt 400, {"message": "Missing Courses paramaters"}.to_json
+    end
   end
   
   # Create a Category Given CategoryNum, Name, and ReqHours
