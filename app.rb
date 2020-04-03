@@ -28,11 +28,11 @@ end
 DataMapper.finalize
 
 User.auto_upgrade!
-PlannedFutureCourses.auto_upgrade!
+PlannedFutureCourse.auto_upgrade!
 CourseALT.auto_upgrade!
 CourseCategories.auto_upgrade!
 CoursePreREQ.auto_upgrade!
-StudentCourses.auto_upgrade!
+StudentCourse.auto_upgrade!
 AllCourses.auto_upgrade!
 Categories.auto_upgrade!
 
@@ -53,91 +53,105 @@ post '/createAdmin' do
   end
 end
 
-     # TEST # Create user with custom serial id
-     post '/customid' do
-      username = params["username"]
-    password = params["password"]
-    fn = params["firstName"]
-    ln = params["lastName"]
-    id = params["id"]
-    if username && password
-      user = User.first(Email: username.downcase)
-  
-      if(user)
-          halt 422, {"message": "Username already in use"}.to_json
-      else
-        if fn && ln && id
-          u = User.new
-          u.FirstName = fn
-          u.LastName = ln
-          u.Email = username.downcase
-          u.Password = password
-          u.id = id
-          u.save
-          halt 201, {"message": "Account successfully registered"}.to_json
-        else
-          message = "Missing First or Last Name or ID"
-          halt 400, {"message": message}.to_json
-        end
-      end
+# TEST # Create user with custom serial id
+post '/customid' do
+  username = params["username"]
+  password = params["password"]
+  fn = params["firstName"]
+  ln = params["lastName"]
+  id = params["id"]
+  if username && password
+    user = User.first(Email: username.downcase)
+ 
+    if(user)
+      halt 422, {"message": "Username already in use"}.to_json
     else
+      if fn && ln && id
+        u = User.new
+        u.FirstName = fn
+        u.LastName = ln
+        u.Email = username.downcase
+        u.Password = password
+        u.id = id
+        u.save
+        halt 201, {"message": "Account successfully registered"}.to_json
+      else
+        message = "Missing First or Last Name or ID"
+        halt 400, {"message": message}.to_json
+      end
+    end
+  else
       message = "Missing username or password"
       halt 400, {"message": message}.to_json
-    end
-    end
+  end
+end
     
-    #test add 10 regular users if there's less than 3 users
-    get '/test' do
-      api_authenticate!
+#test add 10 regular users if there's less than 3 users
+get '/test' do
+  api_authenticate!
   
-    if User.count < 3
+  if User.count < 3
     
-      i = 1
-      last = 11
+    i = 1
+    last = 11
       
-      while i < last do
-        u = User.new
-        u.id = i + 9999
-        u.Email = "email#{i}@email.com"
-        u.FirstName = "user#{i}"
-        u.Password = "pw#{i}"
-        u.save
-        i += 1
+    while i < last do
+      u = User.new
+      u.id = i + 9999
+      u.Email = "email#{i}@email.com"
+      u.FirstName = "user#{i}"
+      u.Password = "pw#{i}"
+      u.save
+      i += 1 
+    end
       
-        print u.id
-        print u.Email
-        print u.FirstName
-        print u.Password
-      
-      end
-      
-      return "Created 10 users"
-      end
-      return "Current Users: #{User.count}"
+    return "Created 10 users"
+  end
+  
+  return "Current Users: #{User.count}"
     
+end
+
+#test delete all non admin users
+delete '/allUsers' do
+  u = User.all(admin: false)
+  u.destroy
+
+  if User.count == 1
+    halt 200, {message: "All Users Successfully deleted"}.to_json
+  else
+    halt 400, {message: "Unable to delete all users"}.to_json
+  end
+end
+  
+#Test user authentication
+get '/test_authentication' do
+  api_authenticate!
+  
+  halt 200, {message: "User Authentication passed."}.to_json
+end  
+#CHECKS IF GIVEN COURSEID CATALOG YEAR MATCHES GIVEN USERID CATALOG YEAR
+#RETURNS TRUE IF MATCH, OR IF COURSE HAS NO CATALOG YEAR
+#RETURNS FALSE IF COURSE IS PART OF DIFFERENT CATALOG YEAR
+def same_catalog_year courseid, userid
+  cats = CourseCategories.all(CourseID: courseid)
+  if cats
+    cats.each do |i|
+    yrs << Categories.get(i.CategoryID)
     end
-
-    #test delete all non admin users
-    delete '/allUsers' do
-      u = User.all(admin: false)
-      u.destroy
-
-      if User.count == 1
-        halt 200, {message: "All Users Successfully deleted"}.to_json
-      else
-        halt 400, {message: "Unable to delete all users"}.to_json
+    if yrs
+      u = User.get(userid)
+      yrs.each do |i|
+        u.CatalogYear == i.CatalogYear ? (return true) : next
       end
+      return false
     end
-  
-    #Test user authentication
-    get '/test_authentication' do
-      api_authenticate!
-  
-      halt 200, {message: "User Authentication passed."}.to_json
-    end  
-  
+  else
+    return true
+  end
+end
 
-  ############## CREATE ################
+############## CREATE ################
 
 
  
@@ -147,15 +161,59 @@ end
   
   # Create entry to StudentCourses using current UserID
   # (Depending on params given)
-  
-  
-  # Create entry to StudentCourses given UserID
-  # (Depending on params given)
-  
+  post '/add/StudentCourses' do
+    api_authenticate!
+    userid = params['UserID']
+    courseid = params['CourseID']
+    semester = params['Semester']
+    grade = params['Grade']
+    notes = params['Notes']
+    if courseid && semester && grade
+      if userid
+        if current_user.admin
+          # I COULD CHECK IF COURSE CATALOG YEAR MATCHES USER CATALOG YEAR
+          # if same_catalog_year(courseid, userid)    
+          # BUT NOT SURE WHY WE'D NEED THIS CHECK HERE
+          c = StudenCourses.new
+          c.UserID = userid
+          c.CourseID = courseid
+          c.SemesterID = semester
+          c.Grade = grade
+          if notes != nil
+            c.Notes = notes 
+          end
+          c.save
+          halt 201, {"message": "Course added successfully"}.to_json
+        else
+          halt 401, {"message": "Unauthorized user"}.to_json
+        end
+      else
+        # I COULD CHECK IF COURSE CATALOG YEAR MATCHES USER CATALOG YEAR
+        # if same_catalog_year(courseid, current_user.id)
+        # BUT NOT SURE WHY WE'D NEED THIS CHECK HERE
+        c = StudenCourses.new
+        c.UserID = current_user.id
+        c.CourseID = courseid
+        c.SemesterID = semester
+        c.Grade = grade
+        if notes != nil
+          c.Notes = notes
+        end
+        c.save
+        halt 201, {"message": "Course added successfully"}.to_json
+      end
+    else
+      halt 400, {"message": "Missing courseID, semester, or grade"}.to_json
+    end
+  end
   
   # Create entries to PlannedFutureCourses given JSON list of courses, 
-  # list of courses should have CourseID and SemesterID. 
-  
+  # list of courses should have CourseID and Semester. 
+  post '/add/PlannedCourses' do
+    api_authenticate!
+    courseid = params['CourseID']
+    semester = params['Semester']
+  end
   
   # Create a Category Given CategoryNum, Name, and ReqHours
   
