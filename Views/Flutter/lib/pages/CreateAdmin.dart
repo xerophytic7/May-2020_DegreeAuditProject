@@ -13,7 +13,7 @@ class CreateAdmin extends StatefulWidget {
 
  Future<String> code() async {
     final response = await http.post(
-      'https://127.0.0.1:4567/createAdmin',
+      'https://192.168.0.117:4567/createAdmin',
     );
     if(response.statusCode != null)
     return response.statusCode.toString();
@@ -42,7 +42,7 @@ class _CreateAdminState extends State<CreateAdmin> {
             text: "Create",
             background: Colors.green,
             onPressed: () async {
-              //kode = code().toString();
+              kode = code().toString();
               showDialog(
                 context: context,
                 builder: (_) => Popup(message: kode),

@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "/home/mario/seniordesign1/DegreeAudit/Views/Flutter/build/app/intermediates/incremental/mergeDebugResources/merged.dir/values-it/values-it.xml",
+            "outputFile": "D:\\College\\2020 Spring\\seniordesign\\DegreeAudit\\Views\\Flutter\\build\\app\\intermediates\\incremental\\mergeDebugResources\\merged.dir\\values-it\\values-it.xml",
             "map": [
                 {
-                    "source": "/home/mario/.gradle/caches/transforms-2/files-2.1/0a271e99b6771ad4a84318244d532fb7/core-1.0.0/res/values-it/values-it.xml",
+                    "source": "C:\\Users\\Mario-PC\\.gradle\\caches\\transforms-2\\files-2.1\\0a271e99b6771ad4a84318244d532fb7\\core-1.0.0\\res\\values-it\\values-it.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",

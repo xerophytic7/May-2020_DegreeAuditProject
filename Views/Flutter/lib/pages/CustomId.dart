@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:seniordesign/popup.dart';
 import 'package:nice_button/nice_button.dart';
@@ -9,11 +11,16 @@ class CustomId extends StatefulWidget {
   _CustomIdState createState() => _CustomIdState();
 }
 
-
+String token = " ";
 
  Future<String> code() async {
+
+
+    String username,password,fn,ln,id;
+    
     final response = await http.post(
-      'http://127.0.0.1:4567/CustomId',
+      "http://localhost:4567/customid?username=${username}&password=${password}&firstname=${fn}&lastname=${ln}&id=${id}",
+      headers: {HttpHeaders.authorizationHeader: "${token}"}
     );
     if(response.statusCode != null)
     return response.statusCode.toString();

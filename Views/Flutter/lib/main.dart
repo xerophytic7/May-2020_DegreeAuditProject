@@ -5,8 +5,8 @@ import 'package:seniordesign/pages/PostAddCourse.dart';
 import 'package:seniordesign/pages/PostAddStudentCourse.dart';
 import 'package:seniordesign/pages/Testid.dart';
 import 'package:seniordesign/pages/DelAllUsers.dart';
-import 'package:seniordesign/pages/PostAddCourse.dart';
-import 'package:seniordesign/pages/PostAddStudentCourse.dart';
+
+import 'package:seniordesign/pages/Drawer.dart';
 
 void main() => runApp(MyApp());
 
@@ -47,6 +47,7 @@ class _MainMenuState extends State<MainMenu> {
     return PageView(
       controller: _controller,
       children: [
+        DrawerHomePage(),
         CreateAdmin(),
         CustomId(),
         TestId(),
