@@ -23,6 +23,7 @@ dependencies:
   nice_button: ^0.1.7
   grouped_buttons: ^1.0.4
   flutter_secure_storage: ^3.3.2
+  percent_indicator: "^2.1.1"
 
 
   # The following adds the Cupertino Icons font to your application.

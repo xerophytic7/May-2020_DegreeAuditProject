@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:nice_button/NiceButton.dart';
 import 'package:seniordesign/RegisterScreen.dart';
+import 'package:seniordesign/StudentMainScreen.dart';
 import 'package:seniordesign/TestScreen.dart';
+import 'package:seniordesign/StudentMainScreen.dart';
 import 'package:seniordesign/popup.dart';
 import 'package:seniordesign/globals/globals.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -24,16 +26,17 @@ Future<int> code() async {
 
 print(response.body);
   if(response.statusCode == 200){
+
     print(response.statusCode);
     print("One");
     Map<String, dynamic> data = json.decode(response.body);
     print("Six");
     await storage.write(key: "token", value: data["token"]);
-    print("Five");
     String value = await storage.read(key: "token");
     print("Four");
     return response.statusCode;
     print(value);
+
   }
   if (response.statusCode != null) {
     return response.statusCode;
@@ -139,10 +142,11 @@ class _LoginScreenState extends State<LoginScreen> {
                         );
                         }
                         if (statusCode == 200) {
+                          print("success");
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => TestScreen()),
+                                builder: (context) => StudentMainScreen()),
                           );
                         }
 
