@@ -19,6 +19,7 @@ require File.expand_path("../models/StudentCourses.rb", __FILE__)
 #require_relative 'models/PlannedFutureCourses.rb'
 #require_relative 'models/StudentCourses.rb'
 
+
 if ENV['DATABASE_URL']
   DataMapper::setup(:default, ENV['DATABASE_URL'] || 'postgres://localhost//mydb')
 else

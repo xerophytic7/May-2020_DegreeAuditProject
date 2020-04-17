@@ -1,10 +1,23 @@
 import 'dart:io';
-
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:seniordesign/popup.dart';
 import 'package:nice_button/nice_button.dart';
 import 'dart:async';
 import 'package:http/http.dart' as http;
+
+
+import 'package:seniordesign/globals/globals.dart';
+
+
+
+
+  TextEditingController usernameTextCtrl = TextEditingController();
+  TextEditingController passwordTextCtrl = TextEditingController();
+  TextEditingController fnTextCtrl = TextEditingController();
+  TextEditingController lnTextCtrl = TextEditingController();
+  TextEditingController idTextCtrl = TextEditingController();
+
 
 class CustomId extends StatefulWidget {
   @override
@@ -16,14 +29,18 @@ String token = " ";
  Future<String> code() async {
 
 
-    String username,password,fn,ln,id;
+    //String username,password,fn,ln,id;
     
     final response = await http.post(
-      "http://localhost:4567/customid?username=${username}&password=${password}&firstname=${fn}&lastname=${ln}&id=${id}",
-      headers: {HttpHeaders.authorizationHeader: "${token}"}
+      "${address}/customid?username=${usernameTextCtrl.text}&password=${passwordTextCtrl.text}&firstName=${fnTextCtrl.text}&lastName=${lnTextCtrl.text}&id=${idTextCtrl.text}",
+      //headers: {HttpHeaders.authorizationHeader: "${token}"}
     );
-    if(response.statusCode != null)
-    return response.statusCode.toString();
+    
+    if(response.statusCode != null){
+      Map<String, dynamic> data = json.decode(response.body);
+      return data["message"]; 
+    }
+    
     else
     return "0";
   }
@@ -31,11 +48,7 @@ String token = " ";
 
 class _CustomIdState extends State<CustomId> {
   
-  TextEditingController usernameTextCtrl = TextEditingController();
-  TextEditingController passwordTextCtrl = TextEditingController();
-  TextEditingController fnTextCtrl = TextEditingController();
-  TextEditingController lnTextCtrl = TextEditingController();
-  TextEditingController idTextCtrl = TextEditingController();
+
 
   String kode = "0";
   @override
@@ -81,7 +94,9 @@ class _CustomIdState extends State<CustomId> {
             text: "Submit",
             background: Colors.green,
             onPressed: () async {
-              kode = code().toString();
+               //print("${address}/customid?username=${usernameTextCtrl.text}&password=${passwordTextCtrl.text}&firstname=${fnTextCtrl.text}&lastname=${lnTextCtrl.text}&id=${idTextCtrl.text}");
+              kode = await code();
+              //bug if in the textfield there is a space after like "22 " then it wont work must clear of spaces after text
               showDialog(
                 context: context,
                 builder: (_) => Popup(message: kode),

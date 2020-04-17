@@ -3,6 +3,8 @@ import 'package:seniordesign/popup.dart';
 import 'package:nice_button/nice_button.dart';
 import 'dart:async';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:seniordesign/globals/globals.dart';
 
 class DelAllUsers extends StatefulWidget {
   @override
@@ -13,10 +15,14 @@ class DelAllUsers extends StatefulWidget {
 
  Future<String> code() async {
     final response = await http.delete(
-      'http://127.0.0.1:4567/allUsers',
+      '${address}//allUsers',
     );
-    if(response.statusCode != null)
-    return response.statusCode.toString();
+
+    if(response.statusCode != null){
+      Map<String, dynamic> data = json.decode(response.body);
+      return data["message"]; 
+    }
+    
     else
     return "0";
   }
@@ -42,7 +48,9 @@ class _DelAllUsersState extends State<DelAllUsers> {
             text: "Delete All",
             background: Colors.red,
             onPressed: () async {
-              kode = code().toString();
+              
+              kode = await code();
+
               showDialog(
                 context: context,
                 builder: (_) => Popup(message: kode),

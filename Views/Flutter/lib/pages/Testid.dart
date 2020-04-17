@@ -4,6 +4,8 @@ import 'package:nice_button/nice_button.dart';
 import 'dart:async';
 import 'package:http/http.dart' as http;
 
+import 'package:seniordesign/globals/globals.dart';
+
 class TestId extends StatefulWidget {
   @override
   _TestIdState createState() => _TestIdState();
@@ -13,7 +15,7 @@ class TestId extends StatefulWidget {
 
  Future<String> code() async {
     final response = await http.get(
-      'http://127.0.0.1:4567/test',
+      '${address}/test',
     );
     if(response.statusCode != null)
     return response.statusCode.toString();

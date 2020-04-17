@@ -4,6 +4,8 @@ import 'package:nice_button/nice_button.dart';
 import 'dart:async';
 import 'package:http/http.dart' as http;
 
+import 'package:seniordesign/globals/globals.dart';
+
 class PostAddStudentCourses extends StatefulWidget {
   @override
   _PostAddStudentCoursesState createState() => _PostAddStudentCoursesState();
@@ -13,7 +15,7 @@ class PostAddStudentCourses extends StatefulWidget {
 
  Future<String> code() async {
     final response = await http.post(
-      'http://127.0.0.1:4567/add/Course',
+      '${address}/add/Course',
     );
     if(response.statusCode != null)
     return response.statusCode.toString();
