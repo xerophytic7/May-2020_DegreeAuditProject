@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:seniordesign/popup.dart';
 import 'package:nice_button/nice_button.dart';
 import 'dart:async';
+
 import 'package:http/http.dart' as http;
 
 import 'package:seniordesign/globals/globals.dart';
@@ -15,7 +16,8 @@ TextEditingController usernameTextCtrl = TextEditingController();
 TextEditingController passwordTextCtrl = TextEditingController();
 TextEditingController fnTextCtrl = TextEditingController();
 TextEditingController lnTextCtrl = TextEditingController();
-TextEditingController idTextCtrl = TextEditingController();
+
+//TextEditingController idTextCtrl = TextEditingController();
 
 
 
@@ -23,13 +25,13 @@ Future<String> code() async {
   //String username,password,fn,ln,id;
 
   final response = await http.post(
-    "${address}/customid?username=${usernameTextCtrl.text}&password=${passwordTextCtrl.text}&firstName=${fnTextCtrl.text}&lastName=${lnTextCtrl.text}&id=${idTextCtrl.text}",
+    "${address}/api/register?username=${usernameTextCtrl.text}&password=${passwordTextCtrl.text}&firstName=${fnTextCtrl.text}&lastName=${lnTextCtrl.text}",
     //headers: {HttpHeaders.authorizationHeader: "${token}"}
   );
-
+  print("");
   if (response.statusCode != null) {
     Map<String, dynamic> data = json.decode(response.body);
-    return data["message"];
+    return data["message"];// 'message' : "hi"
   } else
     return "0";
 }
@@ -152,24 +154,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       controller: lnTextCtrl,
                     ),
-                  ),Padding(
-                    padding: EdgeInsets.all(10),
-                    child: new TextFormField(
-                      decoration: new InputDecoration(
-                        //labelText: "Enter Username",
-                        hintText: "id",
-                        fillColor: Colors.white,
-                        border: new OutlineInputBorder(
-                          borderRadius: new BorderRadius.circular(25.0),
-                          borderSide: new BorderSide(),
-                        ),
-                        //fillColor: Colors.green
-                      ),
-                      style: new TextStyle(
-                        fontFamily: "Poppins",
-                      ),
-                      controller: idTextCtrl,
-                    ),
+                  // ),Padding(
+                  //   padding: EdgeInsets.all(10),
+                  //   child: new TextFormField(
+                  //     decoration: new InputDecoration(
+                  //       //labelText: "Enter Username",
+                  //       hintText: "id",
+                  //       fillColor: Colors.white,
+                  //       border: new OutlineInputBorder(
+                  //         borderRadius: new BorderRadius.circular(25.0),
+                  //         borderSide: new BorderSide(),
+                  //       ),
+                  //       //fillColor: Colors.green
+                  //     ),
+                  //     style: new TextStyle(
+                  //       fontFamily: "Poppins",
+                  //     ),
+                  //     controller: idTextCtrl,
+                  //   ),
                   ),
                   Padding(
                     padding: EdgeInsets.all(6),
@@ -181,7 +183,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       textColor: Color(0xffebebe8),
                       background: Color(0xffcf4411),
                       onPressed: () async {
-                        if(usernameTextCtrl.text.isEmpty || passwordTextCtrl.text.isEmpty || fnTextCtrl.text.isEmpty || lnTextCtrl.text.isEmpty || idTextCtrl.text.isEmpty){
+                        if(usernameTextCtrl.text.isEmpty || passwordTextCtrl.text.isEmpty || fnTextCtrl.text.isEmpty || lnTextCtrl.text.isEmpty){// || idTextCtrl.text.isEmpty){
                         showDialog(
                           context: context,
                           builder: (_) => Popup(message: "Please fill out all fields"),

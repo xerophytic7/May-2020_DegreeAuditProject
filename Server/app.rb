@@ -19,6 +19,10 @@ require File.expand_path("../models/StudentCourses.rb", __FILE__)
 #require_relative 'models/PlannedFutureCourses.rb'
 #require_relative 'models/StudentCourses.rb'
 
+set :bind, '192.168.0.117'
+set :port, 4567
+
+
 if ENV['DATABASE_URL']
   DataMapper::setup(:default, ENV['DATABASE_URL'] || 'postgres://localhost//mydb')
 else
@@ -480,6 +484,18 @@ end
       current_user.GPA, current_user.CatalogYear, current_user.Classification,
     current_user.Hours, current_user.AdvancedHours, current_user.Advanced_CS_Hours]
     
+    halt 200, {
+    "FirstName"       => "#{current_user.FirstName}",
+    "LastName"        => "#{current_user.LastName}",
+    "Email"           => "#{current_user.Email}",
+    "GPA"             => "#{current_user.GPA}",
+    "CatalogYear"     => "#{current_user.CatalogYear}",
+    "Classification"  => "#{current_user.Classification}",
+    "Hours"           => "#{current_user.Hours}",
+    "AdvancedCsHours" => "#{current_user.Advanced_CS_Hours}",
+    "AdvancedHours"   => "#{current_user.AdvancedHours}",
+  }.to_json
+
     return list.to_json
   end
   
@@ -599,11 +615,11 @@ end
   get '/all/Courses' do
     api_authenticate!
     
-    if current_user.admin
+   # if current_user.admin
       return AllCourses.all.to_json
-    else
-      halt 400, {'message': "Unauthorized User"}.to_json
-    end
+   # else
+   #   halt 400, {'message': "Unauthorized User"}.to_json
+    #end
   end
   
   

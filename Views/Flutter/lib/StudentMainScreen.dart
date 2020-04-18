@@ -1,5 +1,34 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/percent_indicator.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:seniordesign/globals/globals.dart';
+import 'dart:async';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
+final storage = new FlutterSecureStorage();
+
+String firstname = "USER";
+String lastname = "USER";
+Future<String> StudentInfo() async {
+  //String username,password,fn,ln,id;
+  String value = await storage.read(key: "token");
+  print("This is the supposed Token $value");
+  final response = await http.get(
+    "${address}/MyInfo",
+    headers: {HttpHeaders.authorizationHeader: "Bearer ${value}"},
+  );
+
+    Map<String, dynamic> data = json.decode(response.body);
+  print("return the JSON of info ==> $data");
+
+    firstname = data["FirstName"];
+    lastname = data["LastName"];
+
+}
 
 class StudentMainScreen extends StatefulWidget {
   //StudentMainScreen({Key key, this.title}) : super(key: key);
@@ -13,7 +42,9 @@ class StudentMainScreen extends StatefulWidget {
 class _StudentMainScreenState extends State<StudentMainScreen> {
   int statusCode = 0;
   @override
+
   Widget build(BuildContext context) {
+      StudentInfo();
     return new Scaffold(
       backgroundColor: Color(0xff65646a),
       body: new Center(
@@ -44,7 +75,7 @@ class _StudentMainScreenState extends State<StudentMainScreen> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        new Text(" Welcome USER",
+                        new Text(" Welcome! $firstname $lastname",
                             style: TextStyle(
                                 color: Color(0xffcf4411),
                                 fontWeight: FontWeight.bold)),
@@ -79,36 +110,23 @@ class _StudentMainScreenState extends State<StudentMainScreen> {
                           radius: 100.0,
                           lineWidth: 12.0,
                           percent: 0.9,
-                          center: new Text("General\n Core",
-                              style: TextStyle(color: Color(0xffcf4411))),
+                          center: new Text("10%",
+                              style: TextStyle(
+                                  color: Color(0xffcf4411), fontSize: 30)),
                           progressColor: Color(0xffcf4411),
                           backgroundColor: Color(0xffebebe8),
                         ),
                       ),
-                      Padding(
-                        padding: EdgeInsets.all(10),
-                        child: new CircularPercentIndicator(
-                          radius: 100.0,
-                          lineWidth: 12.0,
-                          percent: 0.7,
-                          center: new Text("Major\n Specific",
-                              style: TextStyle(color: Color(0xffcf4411))),
-                          progressColor: Color(0xffcf4411),
-                          backgroundColor: Color(0xffebebe8),
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.all(10),
-                        child: new CircularPercentIndicator(
-                          radius: 100.0,
-                          lineWidth: 12.0,
-                          percent: 0.8,
-                          center: new Text("Supported\n Courses",
-                              style: TextStyle(color: Color(0xffcf4411))),
-                          progressColor: Color(0xffcf4411),
-                          backgroundColor: Color(0xffebebe8),
-                        ),
-                      ),
+                      Column(children: [
+                        Text("10%",
+                            style: TextStyle(
+                                color: Color(0xffcf4411), fontSize: 30)),
+                      ]),
+                      Column(children: [
+                        Text("10%",
+                            style: TextStyle(
+                                color: Color(0xffcf4411), fontSize: 30)),
+                      ]),
                     ],
                   )),
                 ),
@@ -122,7 +140,7 @@ class _StudentMainScreenState extends State<StudentMainScreen> {
                   margin: const EdgeInsets.all(10.0),
                   //color: Color(0xffebebe8),
                   width: 48.0 * 8,
-                  height: 48.0 * 8,
+                  height: 48.0 * 9,
                   decoration: BoxDecoration(
                       gradient: LinearGradient(
                           colors: [Color(0xffebebe8), Color(0xffebebe8)]),
@@ -134,15 +152,60 @@ class _StudentMainScreenState extends State<StudentMainScreen> {
                             blurRadius: 8.0)
                       ]),
                   child: (Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: <Widget>[
-                    FloatingActionButton(onPressed: null,
-                    child: Icon(Icons.add),
-                    backgroundColor: Color(0xffcf4411),)
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        Row(
+                          children: <Widget>[
+                            Padding(
+                              padding: EdgeInsets.all(10),
+                              child: new CircularPercentIndicator(
+                                radius: 100.0,
+                                lineWidth: 12.0,
+                                percent: 0.9,
+                                center: new Text("General\n Core",
+                                    style: TextStyle(color: Color(0xffcf4411))),
+                                progressColor: Color(0xffcf4411),
+                                backgroundColor: Color(0xffebebe8),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: <Widget>[
+                            Padding(
+                              padding: EdgeInsets.all(10),
+                              child: new CircularPercentIndicator(
+                                radius: 100.0,
+                                lineWidth: 12.0,
+                                percent: 0.9,
+                                center: new Text("General\n Core",
+                                    style: TextStyle(color: Color(0xffcf4411))),
+                                progressColor: Color(0xffcf4411),
+                                backgroundColor: Color(0xffebebe8),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: <Widget>[
+                            Padding(
+                              padding: EdgeInsets.all(10),
+                              child: new CircularPercentIndicator(
+                                radius: 100.0,
+                                lineWidth: 12.0,
+                                percent: 0.9,
+                                center: new Text("General\n Core",
+                                    style: TextStyle(color: Color(0xffcf4411))),
+                                progressColor: Color(0xffcf4411),
+                                backgroundColor: Color(0xffebebe8),
+                              ),
+                            ),
+                          ],
+                        ),
 
-                    ///Here
-                  ])),
+                        ///Here
+                      ])),
                 ),
               ],
             ),

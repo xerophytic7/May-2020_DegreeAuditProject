@@ -6,10 +6,12 @@ import 'package:seniordesign/TestScreen.dart';
 import 'package:seniordesign/StudentMainScreen.dart';
 import 'package:seniordesign/popup.dart';
 import 'package:seniordesign/globals/globals.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
 import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 final storage = new FlutterSecureStorage();
 
@@ -23,6 +25,7 @@ Future<int> code() async {
     "${address}/api/login?username=${usernameTextCtrl.text}&password=${passwordTextCtrl.text}",
     //headers: {HttpHeaders.authorizationHeader: "${token}"}
   );
+
 
 print(response.body);
   if(response.statusCode == 200){
