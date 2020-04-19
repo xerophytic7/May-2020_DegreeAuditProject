@@ -670,3 +670,15 @@ end
   
   
   ############## DESTROY ###############
+
+
+
+
+
+  #############OTHER FUNCTIONS#############
+
+  get '/isAdmin' do
+    api_authenticate!  
+    halt 200, {"admin" => "#{current_user.admin}"}.to_json
+
+  end

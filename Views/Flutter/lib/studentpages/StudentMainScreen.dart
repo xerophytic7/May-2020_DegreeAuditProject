@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:ffi';
+
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -13,20 +15,37 @@ final storage = new FlutterSecureStorage();
 
 String firstname = "USER";
 String lastname = "USER";
-Future<String> StudentInfo() async {
+String email = "USEREMAIL";
+String  gpa = "0.0";
+String catalogyear = "####-####";
+String classification = "Undergrad";
+String hours = "0";
+String advancedhours = "0";
+String advancedcshours = "0";
+double perA = 0.32;
+
+Future<Void> StudentInfo() async {
   //String username,password,fn,ln,id;
   String value = await storage.read(key: "token");
   print("This is the supposed Token $value");
   final response = await http.get(
-    "${address}/MyInfo",
-    headers: {HttpHeaders.authorizationHeader: "Bearer ${value}"},
+    "$address/MyInfo",
+    headers: {HttpHeaders.authorizationHeader: "Bearer $value"},
   );
 
-    Map<String, dynamic> data = json.decode(response.body);
+  Map<String, dynamic> data = json.decode(response.body);
   print("return the JSON of info ==> $data");
 
-    firstname = data["FirstName"];
-    lastname = data["LastName"];
+  if(data["FirstName"] != "")      firstname       = data["FirstName"];
+  if(data["LastName"] != "")       lastname        = data["LastName"];
+  if(data["Email"] != "")          email           = data["Email"];
+  if(data["GPA"] != "")            gpa             = data["GPA"];   
+  if(data["CatalogYear"] != "")    catalogyear     = data["CatalogYear"];      
+  if(data["Classification"] != "") classification  = data["Classification"];   
+  if(data["Hours"] != "")          hours           = data["Hours"];
+  if(data["AdvancedCSHours"] != "")advancedcshours = data["AdvancedCsHours"];   
+  if(data["AdvancedHours"] != "")  advancedhours   = data["AdvancedHours"];
+  return null;
 
 }
 
@@ -42,9 +61,8 @@ class StudentMainScreen extends StatefulWidget {
 class _StudentMainScreenState extends State<StudentMainScreen> {
   int statusCode = 0;
   @override
-
   Widget build(BuildContext context) {
-      StudentInfo();
+    StudentInfo();
     return new Scaffold(
       backgroundColor: Color(0xff65646a),
       body: new Center(
@@ -109,8 +127,8 @@ class _StudentMainScreenState extends State<StudentMainScreen> {
                         child: new CircularPercentIndicator(
                           radius: 100.0,
                           lineWidth: 12.0,
-                          percent: 0.9,
-                          center: new Text("10%",
+                          percent: perA,
+                          center: new Text("${(perA*100).toInt()}",
                               style: TextStyle(
                                   color: Color(0xffcf4411), fontSize: 30)),
                           progressColor: Color(0xffcf4411),

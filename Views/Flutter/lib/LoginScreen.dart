@@ -1,9 +1,12 @@
+import 'dart:ffi';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:nice_button/NiceButton.dart';
 import 'package:seniordesign/RegisterScreen.dart';
-import 'package:seniordesign/StudentMainScreen.dart';
+import 'package:seniordesign/studentpages/StudentMainScreen.dart';
+import 'package:seniordesign/adminpages/AdminMainScreen.dart';
 import 'package:seniordesign/TestScreen.dart';
-import 'package:seniordesign/StudentMainScreen.dart';
 import 'package:seniordesign/popup.dart';
 import 'package:seniordesign/globals/globals.dart';
 
@@ -18,28 +21,39 @@ final storage = new FlutterSecureStorage();
 TextEditingController usernameTextCtrl = TextEditingController();
 TextEditingController passwordTextCtrl = TextEditingController();
 
+int admin = 0;
+
+Future<Void> iSadmin() async {
+  //String username,password,fn,ln,id;
+
+  final response = await http.get(
+    "$address/isAdmin",
+    headers: {HttpHeaders.authorizationHeader: "${await storage.read(key: "token")}"}
+  );
+  admin = 0;
+  if(response.statusCode == 200)
+    if(json.decode(response.body)["admin"] == "true")
+      admin = 1;
+  return null;
+  
+}
+
 Future<int> code() async {
   //String username,password,fn,ln,id;
 
   final response = await http.get(
-    "${address}/api/login?username=${usernameTextCtrl.text}&password=${passwordTextCtrl.text}",
+    "$address/api/login?username=${usernameTextCtrl.text}&password=${passwordTextCtrl.text}",
     //headers: {HttpHeaders.authorizationHeader: "${token}"}
   );
 
 
 print(response.body);
   if(response.statusCode == 200){
-
-    print(response.statusCode);
-    print("One");
     Map<String, dynamic> data = json.decode(response.body);
-    print("Six");
     await storage.write(key: "token", value: data["token"]);
     String value = await storage.read(key: "token");
-    print("Four");
     return response.statusCode;
-    print(value);
-
+    
   }
   if (response.statusCode != null) {
     return response.statusCode;
@@ -137,19 +151,25 @@ class _LoginScreenState extends State<LoginScreen> {
                       background: Color(0xffcf4411),
                       onPressed: () async {
                         statusCode = await code();
-                        print(statusCode);
+                        iSadmin();
                         if (statusCode != 200) {
                           showDialog(
                           context: context,
                           builder: (_) => Popup(message: "Invalid Credentials"),
                         );
                         }
-                        if (statusCode == 200) {
-                          print("success");
+                        if (statusCode == 200 && admin == 0) {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
                                 builder: (context) => StudentMainScreen()),
+                          );
+                        }
+                        if (statusCode == 200 && admin == 1) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => AdminMainScreen()),
                           );
                         }
 
