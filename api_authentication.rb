@@ -1,13 +1,5 @@
 require 'jwt'
 require "json"
-require File.expand_path("../models/AllCourses.rb", __FILE__)
-require File.expand_path("../models/User.rb", __FILE__)
-require File.expand_path("../models/Categories.rb", __FILE__)
-require File.expand_path("../models/CourseALT.rb", __FILE__)
-require File.expand_path("../models/CourseCategories.rb", __FILE__)
-require File.expand_path("../models/CoursePreREQ.rb", __FILE__)
-require File.expand_path("../models/PlannedFutureCourses.rb", __FILE__)
-require File.expand_path("../models/StudentCourses.rb", __FILE__)
 
 SECRET_KEY = "laUU^%D&IYTV5&^f8^%D7iF865D&687686eIVjflk"
 
