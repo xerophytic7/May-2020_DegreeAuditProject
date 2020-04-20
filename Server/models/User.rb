@@ -15,6 +15,7 @@ class User
   property :admin, Boolean, :default => false
   property :AdvancedHours, Integer
   property :Advanced_CS_Hours, Integer
+  property :mode, String, :default => "major" #For use if the student is Majoring or Minoring in Computer Science
 
   def login(password)
     return self.Password == password

@@ -4,19 +4,21 @@ import 'dart:ffi';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:nice_button/NiceButton.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:seniordesign/globals/globals.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:seniordesign/studentpages/AddAClass.dart';
 
 final storage = new FlutterSecureStorage();
 
 String firstname = "USER";
 String lastname = "USER";
 String email = "USEREMAIL";
-String  gpa = "0.0";
+String gpa = "0.0";
 String catalogyear = "####-####";
 String classification = "Undergrad";
 String hours = "0";
@@ -36,32 +38,30 @@ Future<Void> StudentInfo() async {
   Map<String, dynamic> data = json.decode(response.body);
   print("return the JSON of info ==> $data");
 
-  if(data["FirstName"] != "")      firstname       = data["FirstName"];
-  if(data["LastName"] != "")       lastname        = data["LastName"];
-  if(data["Email"] != "")          email           = data["Email"];
-  if(data["GPA"] != "")            gpa             = data["GPA"];
-  if(data["CatalogYear"] != "")    catalogyear     = data["CatalogYear"];   
-  if(data["Classification"] != "") classification  = data["Classification"]; 
-  if(data["Hours"] != "")          hours           = data["Hours"];
-  if(data["AdvancedCSHours"] != "")advancedcshours = data["AdvancedCsHours"];
-  if(data["AdvancedHours"] != "")  advancedhours   = data["AdvancedHours"];
-
-
+  if (data["FirstName"] != "") firstname = data["FirstName"];
+  if (data["LastName"] != "") lastname = data["LastName"];
+  if (data["Email"] != "") email = data["Email"];
+  if (data["GPA"] != "") gpa = data["GPA"];
+  if (data["CatalogYear"] != "") catalogyear = data["CatalogYear"];
+  if (data["Classification"] != "") classification = data["Classification"];
+  if (data["Hours"] != "") hours = data["Hours"];
+  if (data["AdvancedCSHours"] != "") advancedcshours = data["AdvancedCsHours"];
+  if (data["AdvancedHours"] != "") advancedhours = data["AdvancedHours"];
 
   return null;
-
 }
 
-class StudentMainScreen extends StatefulWidget {
-  //StudentMainScreen({Key key, this.title}) : super(key: key);
+class StudentMainScreenMinor extends StatefulWidget {
+  //StudentMainScreenMinor({Key key, this.title}) : super(key: key);
 
   //final String title;
 
   @override
-  _StudentMainScreenState createState() => new _StudentMainScreenState();
+  _StudentMainScreenMinorState createState() =>
+      new _StudentMainScreenMinorState();
 }
 
-class _StudentMainScreenState extends State<StudentMainScreen> {
+class _StudentMainScreenMinorState extends State<StudentMainScreenMinor> {
   int statusCode = 0;
   @override
   Widget build(BuildContext context) {
@@ -96,7 +96,7 @@ class _StudentMainScreenState extends State<StudentMainScreen> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        new Text(" Welcome! $firstname $lastname",
+                        new Text(" Welcome! $firstname $lastname \n Minor",
                             style: TextStyle(
                                 color: Color(0xffcf4411),
                                 fontWeight: FontWeight.bold)),
@@ -131,7 +131,7 @@ class _StudentMainScreenState extends State<StudentMainScreen> {
                           radius: 100.0,
                           lineWidth: 12.0,
                           percent: perA,
-                          center: new Text("${(perA*100).toInt()}",
+                          center: new Text("${(perA * 100).toInt()}",
                               style: TextStyle(
                                   color: Color(0xffcf4411), fontSize: 30)),
                           progressColor: Color(0xffcf4411),
@@ -148,6 +148,22 @@ class _StudentMainScreenState extends State<StudentMainScreen> {
                             style: TextStyle(
                                 color: Color(0xffcf4411), fontSize: 30)),
                       ]),
+                      Padding(
+                        padding: EdgeInsets.all(0),
+                        child: NiceButton(
+                          mini: true,
+                          icon: Icons.add,
+                          text: "hi",
+                          background: Color(0xffcf4411),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => AddAClass()),
+                            );
+                          },
+                        ),
+                      ),
                     ],
                   )),
                 ),
@@ -170,7 +186,7 @@ class _StudentMainScreenState extends State<StudentMainScreen> {
                         BoxShadow(
                             color: Colors.black.withOpacity(.3),
                             offset: Offset(0.0, 8.0),
-                            blurRadius: 8.0)
+                            blurRadius: 8.0),
                       ]),
                   child: (Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

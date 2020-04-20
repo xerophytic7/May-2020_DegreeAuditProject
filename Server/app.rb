@@ -679,6 +679,14 @@ end
 
   get '/isAdmin' do
     api_authenticate!  
-    halt 200, {"admin" => "#{current_user.admin}"}.to_json
+    halt 200, {"admin" => "#{current_user.admin}",
+                "mode" => "#{current_user.mode}"}.to_json
 
   end
+
+  # get '/isMajor' do
+  #   api_authenticate!
+
+  #   halt 200, {"mode" => "#{current_user.mode}"}.to_json
+
+  # end

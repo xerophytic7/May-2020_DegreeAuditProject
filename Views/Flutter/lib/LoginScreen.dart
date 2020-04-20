@@ -15,6 +15,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:seniordesign/studentpages/StudentMainScreenMinor.dart';
 
 final storage = new FlutterSecureStorage();
 
@@ -22,6 +23,7 @@ TextEditingController usernameTextCtrl = TextEditingController();
 TextEditingController passwordTextCtrl = TextEditingController();
 
 int admin = 0;
+bool major = true;
 
 Future<Void> iSadmin() async {
   //String username,password,fn,ln,id;
@@ -30,10 +32,12 @@ Future<Void> iSadmin() async {
     "$address/isAdmin",
     headers: {HttpHeaders.authorizationHeader: "${await storage.read(key: "token")}"}
   );
+  print(await storage.read(key: "token"));
   admin = 0;
-  if(response.statusCode == 200)
-    if(json.decode(response.body)["admin"] == "true")
+    if(response.statusCode == 200 && json.decode(response.body)["admin"] == "true")
       admin = 1;
+    if(response.statusCode == 200 && json.decode(response.body)["mode"] == "minor")
+      major = false;
   return null;
   
 }
@@ -158,11 +162,18 @@ class _LoginScreenState extends State<LoginScreen> {
                           builder: (_) => Popup(message: "Invalid Credentials"),
                         );
                         }
-                        if (statusCode == 200 && admin == 0) {
+                        if (statusCode == 200 && admin == 0 && major == true) {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
                                 builder: (context) => StudentMainScreen()),
+                          );
+                        }
+                        if (statusCode == 200 && admin == 0) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => StudentMainScreenMinor()),
                           );
                         }
                         if (statusCode == 200 && admin == 1) {
