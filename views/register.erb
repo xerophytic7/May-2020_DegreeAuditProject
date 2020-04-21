@@ -13,19 +13,21 @@
     <img alt="UTRGV" src="/images/utrgv.jpg" class="img-fluid" alt="Responsive image">  
         <h1>UTRGV Degree Audit</h1>
     </div>
-
+    
     <!-- Login Form -->
-    <form>
-      <input type="text" id="login" class="fadeIn second" name="login" placeholder="username">
-      <input type="text" id="password" class="fadeIn third" name="login" placeholder="password">
-      <input type="submit" class="fadeIn fourth" value="Log In">
+    <form action="/api/register" method="POST">
+      <input type="text" name="username" class="fadeIn second" name="login" placeholder="username">
+      <input type="text" name="password" class="fadeIn third" name="login" placeholder="password">
+      <input type="text" name="firstName" class="fadeIn second" name="login" placeholder="first name">
+      <input type="text" name="lastName" class="fadeIn third" name="login" placeholder="last name">
+      <input type="submit" class="fadeIn fourth" value="Register">
     </form>
 
     <!-- Remind Passowrd -->
     <div id="formFooter">
       <a class="underlineHover" href="/resetPassword">Forgot Password</a>
       <br>
-      <a class="underlineHover" href="/register">Create An Accounnt</a>
+      <a class="underlineHover" href="/">login</a>
     </div>
 
   </div>
