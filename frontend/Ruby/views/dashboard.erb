@@ -1,0 +1,120 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>Dashboard</title>
+  <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+  <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+ 
+  <!-- Custom styles for this template -->
+  <link href="css/dashboard.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+  <div class="d-flex" id="wrapper">
+
+    <!-- Sidebar -->
+    <div class="bg-light border-right" id="sidebar-wrapper">
+      <div class="sidebar-heading">    <img alt="UTRGV" src="/images/utrgv.jpg" class="img-fluid" alt="Responsive image">
+      </div>
+      <div class="list-group list-group-flush">
+        <a href="#" class="list-group-item list-group-item-action bg-light">Home</a>
+        <a href="#" class="list-group-item list-group-item-action bg-light">Advising</a>
+        <a href="#" class="list-group-item list-group-item-action bg-light">Degree Updates</a>
+        <a href="#" class="list-group-item list-group-item-action bg-light">Class Planning</a>
+        <a href="#" class="list-group-item list-group-item-action bg-light">Degree Audits</a>
+        <a href="#" class="list-group-item list-group-item-action bg-light">Graduating Deficiencies</a>
+        <a href="#" class="list-group-item list-group-item-action bg-light">Major Requirements</a>
+        <a href="#" class="list-group-item list-group-item-action bg-light">Profile</a>
+        <a href="#" class="list-group-item list-group-item-action bg-light">Status</a>
+      </div>
+    </div>
+    <!-- /#sidebar-wrapper -->
+
+    <!-- Page Content -->
+    <div id="page-content-wrapper">
+
+      <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+        <button class="btn btn-primary" id="menu-toggle" >
+        <svg viewBox="0 0 100 65" width="40" height="40">
+        <rect width="100" height="10"></rect>
+        <rect y="30" width="100" height="10"></rect>
+        <rect y="60" width="100" height="10"></rect>
+      </svg>
+      </button>
+
+        
+
+
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ml-auto mt-2 mt-lg-0">
+            <li class="nav-item active">
+              <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/">Logout</a>
+            </li>
+                 
+          </ul>
+        </div>
+      </nav>
+
+      <div class="container-fluid">
+        <h1 class="mt-4">Implementation of a Degree Auditing System </h1>
+        <p>
+        Description: Degree Works, Navigate and Scheduler Planner are some of the UTRGV tools
+         available for a student to keep track of his/her academic progress and to efficiently
+          plan his/ her course registration to graduate as soon as possible. However, most of
+           the times these tools are useless due to changes in degree plans over the years,
+            changes in course numbers and/or names, course transfers, etc., etc. 
+        <br>Objectives: - Design and develop a unique system for our CS students to assist them in:<br>
+        <ul>
+  <li>academic advising</li>
+  <li>keep track of degree updates and changes </li>
+  <li>more efficient class planning</li>
+  <li>degree audits</li>
+  <li>address on time graduating deficiencies</li>
+  <li>be fully aware of specific major requirements in the general core </li>
+  <li>more …</li>
+
+</ul>
+             </p>
+      </div>
+    </div>
+    <!-- /#page-content-wrapper         <p>Make sure to keep all page content within the <code>#page-content-wrapper</code>. The top navbar is optional, and just for demonstration. Just create an element with the <code>#menu-toggle</code> ID which will toggle the menu when clicked.</p>
+    -->
+
+  </div>
+  <!-- /#wrapper -->
+
+  <!-- Bootstrap core JavaScript -->
+  <script src="vendor/jquery/jquery.min.js"></script>
+  <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Menu Toggle Script -->
+  <script>
+    $("#menu-toggle").click(function(e) {
+      e.preventDefault();
+      $("#wrapper").toggleClass("toggled");
+    });
+   
+  </script>
+
+</body>
+
+</html>
