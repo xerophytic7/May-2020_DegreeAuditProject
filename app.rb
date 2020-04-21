@@ -103,6 +103,15 @@ get '/classes' do
 	#JSON.parse(c)
 	erb :home, :locals =>{c => c.to_json }
 end
+
+
+post '/register' do
+	redirect "/register"
+  end
+
+get '/register' do
+	erb :register
+  end
 #----------Alexis--------------
 
 
