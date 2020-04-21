@@ -475,6 +475,18 @@ end
   # Classification, Hours, AdvancedHours, & Advanced_CS_Hours from User Table
   get '/MyInfo' do
     api_authenticate!
+
+    halt 200, {
+      "FirstName"       => "#{current_user.FirstName}",
+      "LastName"        => "#{current_user.LastName}",
+      "Email"           => "#{current_user.Email}",
+      "GPA"             => "#{current_user.GPA}",
+      "CatalogYear"     => "#{current_user.CatalogYear}",
+      "Classification"  => "#{current_user.Classification}",
+      "Hours"           => "#{current_user.Hours}",
+      "AdvancedCsHours" => "#{current_user.Advanced_CS_Hours}",
+      "AdvancedHours"   => "#{current_user.AdvancedHours}",
+    }.to_json
     
     list = [current_user.FirstName, current_user.LastName, current_user.Email,
       current_user.GPA, current_user.CatalogYear, current_user.Classification,
@@ -654,3 +666,14 @@ end
   
   
   ############## DESTROY ###############
+
+
+
+  ###MMARIO######
+  get '/isAdmin' do
+    api_authenticate!  
+    halt 200, {"admin" => "#{current_user.admin}",
+                "mode" => "#{current_user.mode}"}.to_json
+
+  end
+  ####
