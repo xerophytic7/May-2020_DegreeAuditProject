@@ -1,0 +1,32 @@
+<link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<!-- Custom styles for this template -->
+<link href="/css/login.css" rel="stylesheet">
+
+<div class="wrapper fadeInDown">
+  <div id="formContent">
+    <!-- Tabs Titles -->
+
+    <!-- Icon -->
+    <div class="fadeIn first">
+    <img alt="UTRGV" src="/images/utrgv.jpg" class="img-fluid" alt="Responsive image">  
+        <h1>UTRGV Degree Audit</h1>
+    </div>
+
+    <!-- Login Form -->
+    <form action="/api/login" method="get">
+      <input type="text" name="username" class="fadeIn second" name="login" placeholder="username">
+      <input type="text" name="password" class="fadeIn third" name="login" placeholder="password">
+      <input type="submit" class="fadeIn fourth" value="Log In">
+    </form>
+
+    <!-- Remind Passowrd -->
+    <div id="formFooter">
+      <a class="underlineHover" href="/resetPassword">Forgot Password</a>
+      <br>
+      <a class="underlineHover" href="/register">Create An Accounnt</a>
+    </div>
+
+  </div>
+</div>
