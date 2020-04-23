@@ -85,47 +85,31 @@ app.post('/register', (req, res) => {
          //if succsesful
         //res.redirect("/login");
     });
-
-   
 });
 
 
-// //register a new user with the api
-// // http://localhost:4567/api/register
-// app.post('/register', (req, res) => {
-//     let username = req.body.username;
-//     let password = req.body.password;
-// 	let firstName = req.body.firstName;
-//     let lastName = req.body.lastName;
-//     //console.log(username, password);
-//     //call api with user info
-//     axios.post('http://localhost:4567/api/register', {username: username, password: password, 
-//     firstName: firstName,  lastName: lastName, }, 
-//     {headers: {'Accept': 'application/json'}})
-//     .then(function (response) {
-//         console.log(response);
-//     })
-//     .catch(function (error) {
-//         console.log(error);
-//     });
 
-// });
+//get login information from api
+//`http://localhost:4567/api/login?username=${username}&password=${password}`
+app.post('/login', (req, res) => {
+    let username = req.body.username.trim();
+    let password = req.body.password.trim();
+    axios.get(`http://localhost:4567/api/login?username=${username}&password=${password}`
+      
+   ).then(function (response) {
+        console.log(response);
+         //if succsesful
+         res.redirect("/home");
+    })
+    .catch(function (error) {
+        console.log(error);
+        
+         //if succsesful
+        //res.redirect("/login");
+    });
 
-
-
-
-
-
-
-
-
-
-
-// // basic view route
-// app.get('/home', function(req, res, next) {
-//   res.render('home');
-// });
-
+  // res.redirect("/home");
+});
 
 
 var server = app.listen(app.get('port'), function() {
