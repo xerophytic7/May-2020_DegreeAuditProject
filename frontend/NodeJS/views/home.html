@@ -85,82 +85,43 @@
           <!--second card-->
             <div class="card">
               <div class="card-header">
-                <h4 class="card-title"> Compleated Courses{{classes}} </h4>
+                <h4 class="card-title"> Compleated Courses </h4>
               </div>
               <div class="card-body">
                 <div class="table-responsive">
                   <table class="table">
                     <thead class=" text-primary">
                       <th>
-                        Course Title
+                        Course Dept
                       </th>
                       <th>
-                        Description
+                        Course number
                       </th>
                       <th>
-                        Semester Date
+                        Course Name
                       </th>
                       <th class="text-right">
-                       Credits 
+                        Semester Date
                       </th>
                     </thead>
                     <tbody>
+                      {{#courses}}  
                       <tr>
                         <td>
-                        Computer Networks
+                          {{CourseDept}}
                         </td>
                         <td>
-                          Intro to computer networks
+                          {{CourseNum}}
                         </td>
                         <td>
-                         07/12/2020
+                          {{Name}} 
                         </td>
                         <td class="text-right">
-                         3.00
+                          {{Institution}}
                         </td>
                       </tr>
-                      <tr>
-                      <td>
-                      Computer Networks
-                      </td>
-                      <td>
-                        Intro to computer networks
-                      </td>
-                      <td>
-                       07/12/2020
-                      </td>
-                      <td class="text-right">
-                       3.00
-                      </td>
-                    </tr>
-                    <tr>
-                    <td>
-                    Computer Networks
-                    </td>
-                    <td>
-                      Intro to computer networks
-                    </td>
-                    <td>
-                     07/12/2020
-                    </td>
-                    <td class="text-right">
-                     3.00
-                    </td>
-                  </tr>
-                  <tr>
-                  <td>
-                  Computer Networks
-                  </td>
-                  <td>
-                    Intro to computer networks
-                  </td>
-                  <td>
-                   07/12/2020
-                  </td>
-                  <td class="text-right">
-                   3.00
-                  </td>
-                </tr>
+                      {{/courses}}
+                   
                     </tbody>
                   </table>
                 </div>
@@ -172,7 +133,7 @@
           </div>
         </div>
 
-   
+        {{classes}}
 
       <!--end card-->
     </div>

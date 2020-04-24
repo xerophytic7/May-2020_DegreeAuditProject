@@ -43,14 +43,14 @@ app.get('/home', (req, res) => {
     }).then(function (response) {
         // handle success
         console.log("courses: "+JSON.stringify(response["data"]));
-        let classes = JSON.stringify(response["data"]);
-        console.log("courses variable: "+classes);
+        let courses = response["data"];
+        console.log("courses variable: "+courses);
         //render page with courses 
         res.render("home",{active: 
             { home: true },
             page: "Home",
             token: req.query.token,
-            classes: classes
+            courses: courses    
         });
 
       })
@@ -148,7 +148,7 @@ app.post('/login', (req, res) => {
         console.log(error);
         
          //if succsesful
-        //res.redirect("/login");
+       // res.redirect("/login");
     });
 
   // res.redirect("/home");
