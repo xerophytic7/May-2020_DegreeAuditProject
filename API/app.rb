@@ -11,6 +11,9 @@ require File.expand_path("../models/CoursePreREQ.rb", __FILE__)
 require File.expand_path("../models/PlannedFutureCourses.rb", __FILE__)
 require File.expand_path("../models/StudentCourses.rb", __FILE__)
 
+
+set :bind , '192.168.0.117'
+
 #require_relative 'models/User.rb'
 #require_relative 'models/Categories.rb'
 #require_relative 'models/CourseALT.rb'
@@ -774,7 +777,7 @@ end
   post '/update/Student_Courses' do
       api_authenticate!
     #CourseID is a must, if not flag
-     params['CourseID'] ? (CourseID = params["CourseID"] : (halt 400, {"message": "Missing Parameters"}.to_json)
+     params['CourseID'] ? CourseID = params["CourseID"] : (halt 400, {"message": "Missing Parameters"}.to_json)
     #retrieve parameters to be altered 
      semester = params['Semester'] if params ['Semester']
      grade = params['Grade'] if params['Grade']
@@ -806,7 +809,7 @@ end
   post '/update/PlannedFutureCourses' do
       api_authenticate!
       #CourseID is a must, if not flag
-      params['CourseID'] ? (CourseID = params["CourseID"] : (halt 400, {"message": "Missing Parameters"}.to_json)
+      params['CourseID'] ? CourseID = params["CourseID"] : (halt 400, {"message": "Missing Parameters"}.to_json)
       semester = params['Semester'] if params['Semester']
       
       #retrieve course
@@ -827,7 +830,7 @@ end
    post '/update/AllCourses' do
       api_authenticate!
       if current_user.admin
-         params['CourseID'] ? (CourseID = params["CourseID"] : (halt 400, {"message": "Missing Parameters"}.to_json)
+         params['CourseID'] ? CourseID = params["CourseID"] : (halt 400, {"message": "Missing Parameters"}.to_json)
          CourseDept = params['CourseDept'] if params['CourseDept']
          CourseNum = params['CourseNum']  if params['CourseNum']
          Name = params['Name'] if params['Name']
@@ -860,7 +863,7 @@ end
    post '/update/Categories' do
       api_authenticate!
       if current_user.admin
-         params['CategoryID'] ? (CategoryID = params["CategoryID"] : (halt 400, {"message": "Missing Parameters"}.to_json)
+         params['CategoryID'] ? CategoryID = params["CategoryID"] : (halt 400, {"message": "Missing Parameters"}.to_json)
          Num = params['CategoryNum'] if params['CategoryNum']
          Name = params['CategoryName'] if params['CategoryName']
          Year = params['CatalogYear'] if params['CatalogYear']
@@ -898,7 +901,7 @@ end
 
   post "/remove/planned_course" do
     api_authenticate!
-    params["CourseID"] ? (ID = params["CourseID"] : (halt 400, {"message": "Missing Parameters"}.to_json)
+    params["CourseID"] ? ID = params["CourseID"] : (halt 400, {"message": "Missing Parameters"}.to_json)
    # Query for the course
     Target = PlannedFutureCourses.first(UserID: current_user.id, CourseID: CourseID)
     if Target
@@ -911,7 +914,7 @@ end
 
    post '/remove/StudentCourse' do
       api_authenticate!
-      params["CourseID"] ? (ID = params["CourseID"] : (halt 400, {"message": "Missing Parameters"}.to_json)
+      params["CourseID"] ? ID = params["CourseID"] : (halt 400, {"message": "Missing Parameters"}.to_json)
 
       Target = StudentCourses.first(UserID: current_user.id, CourseID: CourseID)
       if Target
@@ -926,7 +929,7 @@ end
   post '/remove/student' do
     api_authenticate!
     if current_user.admin
-        params["id"] ? (ID = params["id"] : (halt 400, {"message": "Missing Parameters"}.to_json)
+        params["id"] ? ID = params["id"] : (halt 400, {"message": "Missing Parameters"}.to_json)
         u = User.get(ID)
         if u
             u.destroy
@@ -942,8 +945,8 @@ end
   post '/remove/CoursePreREQ' do
    api_authenticate!
    if current_user.admin
-      params["CourseID"] ? (ID = params["CourseID"] : (halt 400, {"message": "Missing Parameters"}.to_json)
-      params["PreReqID"] ? (PreID = params["PreReqID"] : (halt 400, {"message": "Missing Parameters"}.to_json)
+      params["CourseID"] ? ID = params["CourseID"] : (halt 400, {"message": "Missing Parameters"}.to_json)
+      params["PreReqID"] ? PreID = params["PreReqID"] : (halt 400, {"message": "Missing Parameters"}.to_json)
       Target = CoursePreREQ.first(CourseID: ID, PreReqID: PreID)
       if Target
          Target.destroy
@@ -960,7 +963,7 @@ end
   post '/remove/Course' do
    api_authenticate!
    if current_user.admin
-      params["CourseID"] ? (ID = params["CourseID"] : (halt 400, {"message": "Missing Parameters"}.to_json)
+      params["CourseID"] ? ID = params["CourseID"] : (halt 400, {"message": "Missing Parameters"}.to_json)
       Target = AllCourses.get(ID)
       if Target
          Target.destroy
@@ -976,7 +979,7 @@ end
   post '/remove/CourseFromCategory' do
    api_authenticate!
    if current_user.admin
-      params["CourseID"] ? (ID = params["CourseID"] : (halt 400, {"message": "Missing Parameters"}.to_json)
+      params["CourseID"] ? ID = params["CourseID"] : (halt 400, {"message": "Missing Parameters"}.to_json)
       Target = CourseCategories.get(ID)
       if Target
          Target.destroy
