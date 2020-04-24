@@ -558,11 +558,40 @@ end
   end
   
   
+    # Returns current users courses from StudentCourses
+    get '/myCourses' do
+      api_authenticate!
+  
+      courses = StudentCourses.all(UserID: current_user.id)
+      table = Array.new {Hash.new}
+      courses.each do |i|
+        
+        #We already have the CourseID, but this Will also get the dept, num, and name
+        course = AllCourses.first(CourseID: i.CourseID)
+  
+        if course
+          table << {
+            'CourseID'    => course.CourseID,
+            'CourseDept'  => course.CourseDept,
+            'CourseNum'   => course.CourseNum,
+            'Name'        => course.Name,
+            'Semester'    => i.Semester,
+            'Grade'       => i.Grade,
+            'Institution' => course.Institution,
+          }
+        end
+      end
+      halt 200, table.to_json if table.size != 0
+      halt 400, {'message': 'User has no courses'}.to_json
+    end
+
+
+
   # Read current users courses (AND the category the course falls in) from StudentCourses and Categories table.
   # Essentially, returns current_user.CatalogYear, {CourseDept, CourseNum, Name} from AllCourses
   # AND {MainCategory, CategoryNum, CategoryName} from Categories
   # Will calculate user GPA, Classification, Hours, AdvancedHours, and adv_cs_hours
-  get '/myCourses' do
+  get '/myDegreeProgress' do
     api_authenticate!
     #use current_user.id for current users id
 
@@ -602,6 +631,16 @@ end
             ###############################################################################################  
             ################FINISH CALCULATING GPA, CLASSIFICATION, HRS, ADVHRS, ADV CS HRS################
             ###############################################################################################
+          else
+            table << {
+              'CatalogYear'   => 'mismatch',
+              'CourseDept'    => course.CourseDept,
+              'CourseNum'     => course.CourseNum,
+              'Name'          => course.Name,
+              'MainCategory'  => cat.MainCategory,
+              'CategoryNum'   => cat.CategoryNum,
+              'CategoryName'  => cat.CategoryName}
+          
           end
         end
       end
