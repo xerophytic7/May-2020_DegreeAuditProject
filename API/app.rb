@@ -12,7 +12,7 @@ require File.expand_path("../models/PlannedFutureCourses.rb", __FILE__)
 require File.expand_path("../models/StudentCourses.rb", __FILE__)
 
 
-set :bind , '192.168.0.117'
+# set :bind , '192.168.0.117'
 
 #require_relative 'models/User.rb'
 #require_relative 'models/Categories.rb'
