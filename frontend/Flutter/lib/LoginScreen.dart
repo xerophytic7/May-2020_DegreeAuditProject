@@ -169,11 +169,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                 builder: (context) => StudentMainScreen()),
                           );
                         }
-                        if (statusCode == 200 && admin == 0) {
+                        if (statusCode == 200 && admin == 0 && major == false) {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => StudentMainScreenMinor()),
+                                builder: (context) => StudentMainScreen()),
                           );
                         }
                         if (statusCode == 200 && admin == 1) {
