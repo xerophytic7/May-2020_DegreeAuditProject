@@ -11,11 +11,6 @@ require File.expand_path("../models/CoursePreREQ.rb", __FILE__)
 require File.expand_path("../models/PlannedFutureCourses.rb", __FILE__)
 require File.expand_path("../models/StudentCourses.rb", __FILE__)
 
-
-#I set this ip address manually for my own pc so i can connect in my own home network if u get errors comment this out so it can automaticlly be localhost
-# set :bind, '192.168.0.117'
-
-
 #require_relative 'models/User.rb'
 #require_relative 'models/Categories.rb'
 #require_relative 'models/CourseALT.rb'
@@ -328,25 +323,29 @@ end
    
   end
   
-  # Create a Category Given CategoryNum, Name, CatalogYear, and ReqHours
+  # Create a Category Given MainCategory, CategoryNum, Name, CatalogYear, ReqHours, and AdvHours(0 if none required)
   post '/add/Category' do
     api_authenticate!
     if current_user.admin
+      params['MainCategory'] ? (maincat = params['MainCategory']) : (halt 400, {"message": "Missing paramaters"}.to_json)
       params['CategoryNum'] ? (catnum = params['CategoryNum']) : (halt 400, {"message": "Missing paramaters"}.to_json)
       params['Name'] ? (catname = params['Name']) : (halt 400, {"message": "Missing paramaters"}.to_json)
       params['CatalogYear'] ? (catyr = params['CatalogYear']) : (halt 400, {"message": "Missing paramaters"}.to_json)
       params['ReqHours'] ? (reqhrs = params['ReqHours']) : (halt 400, {"message": "Missing paramaters"}.to_json)
+      params['AdvHours'] ? (advhrs = params['AdvHours']) : (halt 400, {"message": "Missing paramaters"}.to_json)
 
-      if !is_number?(reqhrs) || !is_number?(catyr) || !is_number?(catnum)
-        halt 400, {"message": "ReqHours, CatalogYear, and CategoryNum paramaters have to be integers"}.to_json
+      if !is_number?(reqhrs) || !is_number?(advhrs)
+        halt 400, {"message": "ReqHours and AdvHours paramaters have to be integers"}.to_json
       end
       
-      if catnum != '' && catname != '' && reqhrs !='' && catyr != ''
+      if maincat != '' && catnum != '' && catname != '' && reqhrs !='' && catyr != '' && advhrs != ''
         category = Categories.new
+        category.MainCategory = maincat
         category.CategoryNum = catnum
         category.CategoryName = catname
         category.CatalogYear = catyr
         category.ReqHours = reqhrs
+        category.AdvHours = advhrs
         category.save
 
         halt 201, {'message': 'Category created successfully'}.to_json
@@ -369,7 +368,7 @@ end
         halt 400, {"message": "Paramaters need to be integers"}.to_json
       end
 
-      if !AllCourse.get(courseid)
+      if !AllCourses.get(courseid)
         halt 400, {"message": "CourseID not found in AllCourses Table"}.to_json
       end
       if !Categories.get(catid)
@@ -430,7 +429,7 @@ end
   
   
   # Takes in json list of all categories for a catalog year. Creates new degree plan 
-  # (Mainly add to Categories Table: CategoryNum, CategoryName, CatalogYear, and ReqHours. 
+  # (Mainly add to Categories Table: MainCategory, CategoryNum, CategoryName, CatalogYear, ReqHours and AdvHours. 
   post '/create/degreePlan' do
     api_authenticate!
     if current_user.admin
@@ -440,27 +439,32 @@ end
       cats = params[:Categories]
       
       cats.each do |i|
-        if !i[1]['CategoryNum'] || !i[1]['CategoryName'] || !i[1]['CatalogYear'] || !i[1]['ReqHours']
+        if !i[1]['MainCategory'] || !i[1]['CategoryNum'] || !i[1]['CategoryName'] || 
+          !i[1]['CatalogYear'] || !i[1]['ReqHours'] || !i[1]['AdvHours']
+
           halt 400, {'message': 'Missing paramaters, or possible typo'}.to_json
         end
-        if !is_number?(i[1]['ReqHours'])
-          halt 400, {'message': 'ReqHours has to be an integer'}.to_json
+        if !is_number?(i[1]['ReqHours']) || !is_number?(i[1]['AdvHours'])
+          halt 400, {'message': 'ReqHours and AdvHours have to be integers'}.to_json
         end
-        if i[1]['CategoryNum'] == '' || i[1]['CategoryName'] == '' || i[1]['ReqHours'] == ''
+        if i[1]['MainCategory'] == '' || i[1]['CategoryNum'] == '' || i[1]['CategoryName'] == '' || i[1]['ReqHours'] == ''
           halt 400, {'message': 'Paramaters can\'t be empty strings'}.to_json
         end
         #***********      DUPLICATE ENTRY CHECK        *********************
-        if categories.first(CategoryNum: i[1]['CategoryNum'], CategoryName: i[1]['CategoryName'], CatalogYear: i[1]['CatalogYear'])
+        if Categories.first(MainCategory: i[1]['MainCategory'], CategoryNum: i[1]['CategoryNum'], 
+          CategoryName: i[1]['CategoryName'], CatalogYear: i[1]['CatalogYear'])
           halt 409, {'message': 'Duplicate entry'}.to_json 
         end
         
       end
       cats.each do |i|
         c = Categories.new
+        c.MainCategory = i[1]['MainCategory']
         c.CategoryNum = i[1]['CategoryNum']
         c.CategoryName = i[1]['CategoryName']
         c.CatalogYear = i[1]['CatalogYear']
         c.ReqHours = i[1]['ReqHours']
+        c.AdvHours =i[1]['AdvHours']
         c.save
 
       end
@@ -470,6 +474,8 @@ end
       halt 401, {"message": "Unauthorized user"}.to_json
     end
   end
+
+
   # Matching json List of CourseIDs to a CatagoryID
   # with a CourseID and adding that to CourseCategories table.)
   
@@ -480,24 +486,22 @@ end
   # Classification, Hours, AdvancedHours, & Advanced_CS_Hours from User Table
   get '/MyInfo' do
     api_authenticate!
-
+    
+   # list = [current_user.FirstName, current_user.LastName, current_user.Email,
+   #   current_user.GPA, current_user.CatalogYear, current_user.Classification,
+   # current_user.Hours, current_user.AdvancedHours, current_user.Advanced_CS_Hours]
+    
     halt 200, {
-      "FirstName"       => "#{current_user.FirstName}",
-      "LastName"        => "#{current_user.LastName}",
-      "Email"           => "#{current_user.Email}",
-      "GPA"             => "#{current_user.GPA}",
-      "CatalogYear"     => "#{current_user.CatalogYear}",
-      "Classification"  => "#{current_user.Classification}",
-      "Hours"           => "#{current_user.Hours}",
-      "AdvancedCsHours" => "#{current_user.Advanced_CS_Hours}",
-      "AdvancedHours"   => "#{current_user.AdvancedHours}",
+      'FirstName'       => current_user.FirstName,
+      'LastName'        => current_user.LastName,
+      'Email'           => current_user.Email,
+      'GPA'             => current_user.GPA,
+      'CatalogYear'     => current_user.CatalogYear,
+      'Classification'  => current_user.Classification,
+      'Hours'           => current_user.Hours,
+      'AdvancedCsHours' => current_user.Advanced_CS_Hours,
+      'AdvancedHours'   => current_user.AdvancedHours
     }.to_json
-    
-    list = [current_user.FirstName, current_user.LastName, current_user.Email,
-      current_user.GPA, current_user.CatalogYear, current_user.Classification,
-    current_user.Hours, current_user.AdvancedHours, current_user.Advanced_CS_Hours]
-    
-    return list.to_json
   end
   
   
@@ -551,10 +555,61 @@ end
   end
   
   
-  # Read current users courses from StudentCourses table.
-  # Maybe calculate user GPA, Classification, Hours, AdvancedHours,
-  # and Advanced_CS_Hours while we're at it.
-  
+  # Read current users courses (AND the category the course falls in) from StudentCourses and Categories table.
+  # Essentially, returns current_user.CatalogYear, {CourseDept, CourseNum, Name} from AllCourses
+  # AND {MainCategory, CategoryNum, CategoryName} from Categories
+  # Will calculate user GPA, Classification, Hours, AdvancedHours, and adv_cs_hours
+  get '/myCourses' do
+    api_authenticate!
+    #use current_user.id for current users id
+
+    #Get all courses: courses = StudentCourses.all(UserID: current_user.id)
+    courses = StudentCourses.all(UserID: current_user.id)
+    #Create a table to return each course with their category info.
+    table = Array.new {Hash.new}
+    #Search, in a loop, for each course in AllCourses, Cross reference with
+    #CourseCategories to get CategoryID(s): catIDs = CourseCategories.all(CourseID: CourseID)
+    #Search, in a loop, Categories.first(CategoryID: )
+    courses.each do |i|
+      puts i.UserID
+      puts i.CourseID
+      #We already have the CourseID, but this Will also get the dept, num, and name
+      course = AllCourses.first(CourseID: i.CourseID)
+      puts course.Name
+      #Get all the categories course may belong to
+      if course
+        catIDs = CourseCategories.all(CourseID: course.CourseID)
+        #loop through catIDs, get cat = Categories.first(CategoryID: catIDs.CategoryID)
+        #Then check i.f cat.CatalogYear == current_user.CatalogYear. If it is, store
+        #MainCategory, CategoryNum, and CategoryName
+        catIDs.each do |j|
+          cat = Categories.first(CategoryID: j.CategoryID)
+          puts cat.CategoryName
+          puts cat.CatalogYear
+          puts current_user.CatalogYear
+          if cat.CatalogYear == current_user.CatalogYear
+            table << {
+            'CatalogYear'   => current_user.CatalogYear,
+            'CourseDept'    => course.CourseDept,
+            'CourseNum'     => course.CourseNum,
+            'Name'          => course.Name,
+            'MainCategory'  => cat.MainCategory,
+            'CategoryNum'   => cat.CategoryNum,
+            'CategoryName'  => cat.CategoryName}
+            ###############################################################################################  
+            ################FINISH CALCULATING GPA, CLASSIFICATION, HRS, ADVHRS, ADV CS HRS################
+            ###############################################################################################
+          end
+        end
+      end
+    end
+    if table.size != 0
+      halt 200, table.to_json
+    else
+      halt 400, {'message': 'User has no courses'}.to_json
+    end
+  end
+
   
   # Read a students PlannedFutureCourses given an Email or student ID and semester(s)
   get '/usersPlannedCourses' do
@@ -564,24 +619,14 @@ end
     params['semester'] ? (semester = params['semester']) : (halt 400, {'message': 'Missing paramaters'}.to_json)
 
     if userid
-      u = PlannedFutureCourses.first(userid) 
-      
-      if u
-        list = [u.FirstName, u.LastName, u.Email,
-          u.GPA, u.CatalogYear, u.Classification,
-        u.Hours, u.AdvancedHours, u.Advanced_CS_Hours]
-
-        return list.to_json
-      else
-        halt 400, {'message': 'User not found'}.to_json
-      end
+      u = PlannedFutureCourses.all(UserID: userid, Semester: semester) 
+      u ? (halt 200, u.to_json) : (halt 400, {'message': 'User has no planned courses for selected semester'}.to_json)
 
     elsif email
       u = User.first(Email: email)
       if u
-        list = [u.FirstName, u.LastName, u.Email,
-          u.GPA, u.CatalogYear, u.Classification,
-        u.Hours, u.AdvancedHours, u.Advanced_CS_Hours]
+        list = PlannedFutureCourses.all(UserID: u.id, Semester: semester)
+        list ? (halt 200, list.to_json) : (halt 400, {'message': 'User has no planned courses for selected semester'}.to_json)
       
       else
         halt 400, {'message': 'User not found'}.to_json
@@ -598,7 +643,8 @@ end
     params['semester'] ? (semester = params['semester']) : (halt 400, {'message': 'Missing paramaters'}.to_json)
     if current_user.admin
       pfc = PlannedFutureCourses.all(Semester: semester)
-      return pfc.to_json
+      halt 200, pfc.to_json
+      
     else
       halt 401, {'message': 'Unauthorized User'}.to_json
     end
@@ -615,16 +661,35 @@ end
   # Read all courses from AllCourses Table
   get '/all/Courses' do
     api_authenticate!
+    halt 200, AllCourses.all.to_json
     
-    # if current_user.admin
-      return AllCourses.all.to_json
-    # else
-    #   halt 400, {'message': "Unauthorized User"}.to_json
-    # end
   end
   
   
-  # Read course pre requisites given a CourseID
+  # Read course pre requisites given a CourseID.
+  # Returns CoursePreREQ entries that match given CourseID and all it's PreReqs 
+  get '/course/preReq' do
+    api_authenticate!
+    params['CourseID'] ? (cid = params['CourseID']) : (halt 400, {'message': 'Missing Paramater'}.to_json)
+    
+    preReqs = CoursePreREQ.all(CourseID: cid)
+
+    halt 200, preReqs.to_json if preReqs != []
+    
+    halt 400, {'message': 'No courses found'}.to_json
+    
+  end
+
+  # Read a courses info, given its CourseID
+  get '/course' do
+    api_authenticate!
+    params['CourseID'] ? (cid = params['CourseID']) : (halt 400, {'message': 'Missing Paramater'}.to_json)
+
+    course = AllCourses.first(CourseID: cid)
+    halt 200, course.to_json if course
+
+    halt 400, {'message': 'Course not found'}.to_json
+  end
 
 
   # Read all entries in CoursePreREQ table
@@ -633,11 +698,22 @@ end
   #  cp = CoursePreREQ.all
   #  cp.destroy
   #  cp.save
-    return CoursePreREQ.all.to_json
+    halt 200, CoursePreREQ.all.to_json
+    
   end
   
   
-  # Read Courses requiring approval, and their notes
+  # Read StudentCourses requiring approval, and their notes
+  get '/notApproved/andNotes' do
+    api_authenticate!
+    if current_user.admin 
+      sc = StudentCourses.all(Approved: false)
+      halt 200, sc.to_json if sc != []
+      halt 400, {'message': 'No Courses need approval'}.to_json
+    else
+      halt 401, {'message': 'Unauthorized User'}.to_json
+    end
+  end
   
   
   # Read existing catalog years
@@ -648,37 +724,286 @@ end
   get '/all/Users' do
     api_authenticate!
     if current_user.admin
-      return User.all.to_json
+      halt 200, User.all.to_json
     else
       halt 400, {'message': 'Unauthorized User'}.to_json
     end
 
   end
-  
+   ######################################################### HUGOO #######################################################################
   ############## UPDATE ################
+  post '/update/user_info' do
+    
+    api_authenticate!
+
+    email = params['Email']
+    firstName = params['FirstName']
+    lastName = params['LastName']
+    password = params['Password']
   
-  # Update all User attributes from User Table, except UserID (Use params passed)
+   u = User.get(current_user.id)
+   if u
+       if email != '' || firstName != '' || lastName != '' 
+
+      if email != ''
+         u.Email = Email
+       end
+       if firstName != ''
+         u.FirstName = firstName
+       end
+       if lastName != ''
+         u.LastName = lastName
+       end
+          u.save
+         halt 200, {"message": "Updated Successfully"}.to_json
+      elsif password != ''
+       u.Password = password
+       u.save
+       halt 200, {"message": "Updated Successfully"}.to_json
+      else
+           halt 400, {"message": "Missing Paramaters"}.to_json
+      end
+   else
+      halt 404, {"message": "User Not Found"}
+   end
+  end
+
   
-  
-  # Update a users course in StudentCourses table
-  
-  
-  # Update
-  
-  
-  # Update
-  
-  
-  
+
+  # Update a users course in StudenCourses table
+  post '/update/Student_Courses' do
+      api_authenticate!
+    #CourseID is a must, if not flag
+     params['CourseID'] ? (CourseID = params["CourseID"] : (halt 400, {"message": "Missing Parameters"}.to_json)
+    #retrieve parameters to be altered 
+     semester = params['Semester'] if params ['Semester']
+     grade = params['Grade'] if params['Grade']
+     notes = params['Notes'] if params['Notes']
+    # retrieve the current user's course
+    Target = StudentCourses.first(UserID: current_user.id, CourseID: CourseID)
+   if Target
+      if semester != '' || grade != '' || notes != ''
+        if semester != ''
+         Target.Semester = semester
+        end
+        if grade != ''
+         Target.Grade = grade
+        end
+        if notes != ''
+         Target.Notes = notes
+        end
+        Target.save
+        halt 200, {"message": "Course Updated Successfully"}
+      else 
+          halt 400, {"message": "Missing Parameters"}.to_json
+      end
+   else
+      halt 404, {"message": "Object Not Found"}
+   end
+  end
+
+  #Just allows to change semester to which they plan to take the course.
+  post '/update/PlannedFutureCourses' do
+      api_authenticate!
+      #CourseID is a must, if not flag
+      params['CourseID'] ? (CourseID = params["CourseID"] : (halt 400, {"message": "Missing Parameters"}.to_json)
+      semester = params['Semester'] if params['Semester']
+      
+      #retrieve course
+      Target = PlannedFutureCourses.first(UserID: current_user.id, CourseID: CourseID)
+      if Target
+         if Semester != ''
+          Target.Semester = semester
+          Target.save
+          halt 200, {"message": "Course Updated Successfully"}
+         else
+          halt 400, {"message": "Missing Parameters"}.to_json
+         end
+      else
+         halt 404, {"message": "Object Not Found"}
+      end
+   end
+  ############## ADMIN UPDATERS ###########
+   post '/update/AllCourses' do
+      api_authenticate!
+      if current_user.admin
+         params['CourseID'] ? (CourseID = params["CourseID"] : (halt 400, {"message": "Missing Parameters"}.to_json)
+         CourseDept = params['CourseDept'] if params['CourseDept']
+         CourseNum = params['CourseNum']  if params['CourseNum']
+         Name = params['Name'] if params['Name']
+
+         Target = AllCourses.get(CourseID)
+
+         if Target
+            if CourseDept != '' || CourseNum != '' || Name != ''
+               if CourseDept != ''
+                Target.CourseDept = CourseDept
+               end
+               if CourseNum != ''
+                Target.CourseNum = CourseNum
+               end
+               if Name != ''
+                Target.Name = Name
+               end
+                  Target.save
+               halt 200, {"message": "Course Updated Successfully"}
+            else
+             halt 400, {"message": "Missing Parameters"}.to_json
+            end
+         else
+            halt 404, {"message": "Object Not Found"}
+         end
+      else
+         halt 401, {"message": "Unauthorized User"}.to_json
+      end
+   end
+   post '/update/Categories' do
+      api_authenticate!
+      if current_user.admin
+         params['CategoryID'] ? (CategoryID = params["CategoryID"] : (halt 400, {"message": "Missing Parameters"}.to_json)
+         Num = params['CategoryNum'] if params['CategoryNum']
+         Name = params['CategoryName'] if params['CategoryName']
+         Year = params['CatalogYear'] if params['CatalogYear']
+         Hours = params['ReqHours'] if params['ReqHours']
+         Target = Categories.get(CategoryID)
+         if Target 
+            if Num != '' || Name != '' || Year != '' || Hours != ''
+               if Num != ''
+                  Target.CategoryNum = Num
+               end
+               if Name != ''
+                  Target.CategoryName = Name
+               end
+               if Year != ''
+                  Target.CatalogYear = Year
+               end
+               if Hours != ''
+                  Target.ReqHours = Hours
+               end
+                  Target.save
+               halt 200, {"message": "Category Updated Successfully"}
+            else
+              halt 400, {"message": "Missing Parameters"}.to_json 
+            end
+         else
+             halt 404, {"message": "Object Not Found"}
+         end
+      else
+         halt 401, {"message": "Unauthorized User"}.to_json
+      end
+   end
+
+
   ############## DESTROY ###############
 
+  post "/remove/planned_course" do
+    api_authenticate!
+    params["CourseID"] ? (ID = params["CourseID"] : (halt 400, {"message": "Missing Parameters"}.to_json)
+   # Query for the course
+    Target = PlannedFutureCourses.first(UserID: current_user.id, CourseID: CourseID)
+    if Target
+      Target.destroy
+      halt 200, {"message": "Deleted Successfully"}.to_json
+    else
+      halt 404, {"message": "Object Not Found"}
+    end
+   end
 
+   post '/remove/StudentCourse' do
+      api_authenticate!
+      params["CourseID"] ? (ID = params["CourseID"] : (halt 400, {"message": "Missing Parameters"}.to_json)
 
-  ###MMARIO######
-  get '/isAdmin' do
-    api_authenticate!  
-    halt 200, {"admin" => "#{current_user.admin}",
-                "mode" => "#{current_user.mode}"}.to_json
+      Target = StudentCourses.first(UserID: current_user.id, CourseID: CourseID)
+      if Target
+         Target.destroy
+         halt 200, {"message": "Deleted Successfully"}.to_json
+      else
+         halt 404, {"message": "Object Not Found"}
+    end
+   end
+   ################## ADMIN DESTROY #############
 
+  post '/remove/student' do
+    api_authenticate!
+    if current_user.admin
+        params["id"] ? (ID = params["id"] : (halt 400, {"message": "Missing Parameters"}.to_json)
+        u = User.get(ID)
+        if u
+            u.destroy
+            halt 200, {"message": "Deleted Successfully"}.to_json
+        else
+         halt 404, {"message": "Object Not Found"}
+        end
+   else
+        halt 401, {"message": "Unauthorized user"}.to_json
+   end
   end
-  ####
+
+  post '/remove/CoursePreREQ' do
+   api_authenticate!
+   if current_user.admin
+      params["CourseID"] ? (ID = params["CourseID"] : (halt 400, {"message": "Missing Parameters"}.to_json)
+      params["PreReqID"] ? (PreID = params["PreReqID"] : (halt 400, {"message": "Missing Parameters"}.to_json)
+      Target = CoursePreREQ.first(CourseID: ID, PreReqID: PreID)
+      if Target
+         Target.destroy
+         halt 200, {"message": "Deleted Successfully"}.to_json
+      else
+         halt 404, {"message": "Object Not Found"}
+      end         
+
+   else
+      halt 401, {"message": "Unauthorized user"}.to_json
+   end
+  end
+
+  post '/remove/Course' do
+   api_authenticate!
+   if current_user.admin
+      params["CourseID"] ? (ID = params["CourseID"] : (halt 400, {"message": "Missing Parameters"}.to_json)
+      Target = AllCourses.get(ID)
+      if Target
+         Target.destroy
+         halt 200, {"message": "Deleted Successfully"}.to_json
+      else
+         halt 404, {"message": "Object Not Found"}
+      end
+   else
+      halt 401, {"message": "Unauthorized user"}.to_json
+   end
+  end
+
+  post '/remove/CourseFromCategory' do
+   api_authenticate!
+   if current_user.admin
+      params["CourseID"] ? (ID = params["CourseID"] : (halt 400, {"message": "Missing Parameters"}.to_json)
+      Target = CourseCategories.get(ID)
+      if Target
+         Target.destroy
+         halt 200, {"message": "Deleted Successfully"}.to_json
+      else
+         halt 404, {"message": "Object Not Found"}
+      end
+   else
+      halt 401, {"message": "Unauthorized user"}.to_json
+   end
+ end
+
+ ###MMARIO######
+ get '/isAdmin' do
+  api_authenticate!  
+  halt 200, {"admin" => "#{current_user.admin}",
+              "mode" => "#{current_user.mode}"}.to_json
+
+end
+####
+
+#########################################################################################################################################
+###MMARIO######
+get '/isAdmin' do
+  api_authenticate!  
+  halt 200, {"admin" => "#{current_user.admin}",
+              "mode" => "#{current_user.mode}"}.to_json
+
+end
+####
