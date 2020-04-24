@@ -1,5 +1,5 @@
 
-
+//___________________________Server setup_________________
 const express = require('express');
 const path = require('path');
 //const request = require('request');
@@ -23,15 +23,49 @@ var bodyParser = require('body-parser');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-
-
 // setup static file service
 app.use(express.static(path.join(__dirname, 'static')));
 
+const url = require('url'); 
+//const token = ''
+
+//______________________________________________________________________________
+
 //get home page
 app.get('/home', (req, res) => {
+    console.log("home token: "+req.query.token);
 
-    res.render("home",{active: { home: true },page: "Home"});
+    //get all the courses usin token
+    axios.get(`http://localhost:4567/all/Courses`, {
+        headers:{
+            'Authorization': `bearer ${req.query.token}`
+        }        
+    }).then(function (response) {
+        // handle success
+        console.log("courses: "+JSON.stringify(response["data"]));
+        let classes = JSON.stringify(response["data"]);
+        console.log("courses variable: "+classes);
+        //render page with courses 
+        res.render("home",{active: 
+            { home: true },
+            page: "Home",
+            token: req.query.token,
+            classes: classes
+        });
+
+      })
+      .catch(function (error) {
+        // handle error
+        console.log(error);
+      })
+
+
+    // //render page with courses 
+    // res.render("home",{active: 
+    //     { home: true },
+    //     page: "Home",
+    //     token: req.query.token
+    // });
 });
 
 //get login page
@@ -99,7 +133,16 @@ app.post('/login', (req, res) => {
    ).then(function (response) {
         console.log(response);
          //if succsesful
-         res.redirect("/home");
+        const token = response['data'].token;
+        console.log("login token: "+token);
+        // res.redirect("/home"+token);
+        //redirect user to home page with token
+        res.redirect(url.format({
+            pathname:"/home",
+            query: {
+               "token": token,
+             }
+          }));
     })
     .catch(function (error) {
         console.log(error);
