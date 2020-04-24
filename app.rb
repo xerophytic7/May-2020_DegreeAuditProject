@@ -574,6 +574,8 @@ end
           'CourseDept'  => course.CourseDept,
           'CourseNum'   => course.CourseNum,
           'Name'        => course.Name,
+          'Semester'    => i.Semester
+          'Grade'       => i.Grade,
           'Institution' => course.Institution
         }
       end
