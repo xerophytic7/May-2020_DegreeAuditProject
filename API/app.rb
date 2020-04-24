@@ -11,6 +11,11 @@ require File.expand_path("../models/CoursePreREQ.rb", __FILE__)
 require File.expand_path("../models/PlannedFutureCourses.rb", __FILE__)
 require File.expand_path("../models/StudentCourses.rb", __FILE__)
 
+
+#I set this ip address manually for my own pc so i can connect in my own home network if u get errors comment this out so it can automaticlly be localhost
+# set :bind, '192.168.0.117'
+
+
 #require_relative 'models/User.rb'
 #require_relative 'models/Categories.rb'
 #require_relative 'models/CourseALT.rb'
@@ -611,11 +616,11 @@ end
   get '/all/Courses' do
     api_authenticate!
     
-    if current_user.admin
+    # if current_user.admin
       return AllCourses.all.to_json
-    else
-      halt 400, {'message': "Unauthorized User"}.to_json
-    end
+    # else
+    #   halt 400, {'message': "Unauthorized User"}.to_json
+    # end
   end
   
   
