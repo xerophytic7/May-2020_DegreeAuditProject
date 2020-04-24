@@ -215,6 +215,8 @@ end
   #******************ALREADY IMPLEMENTED IN api_authentication.rb******************
   
 
+### MOTIVATION, CHALLENGE, HOW WORK WAS SPLIT UP, POSSIBLE QUESTIONS
+
   
   # Create entry to StudentCourses using current UserID
   # (Depending on params given)
@@ -554,12 +556,38 @@ end
     end
   end
   
+
+  # Returns current users courses from StudentCourses
+  get '/myCourses' do
+    api_authenticate!
+
+    courses = StudentCourses.all(UserID: current_user.id)
+    table = Array.new {Hash.new}
+    courses.each do |i|
+      
+      #We already have the CourseID, but this Will also get the dept, num, and name
+      course = AllCourses.first(CourseID: i.CourseID)
+
+      if course
+        table << {
+          'CourseID'    => course.CourseID,
+          'CourseDept'  => course.CourseDept,
+          'CourseNum'   => course.CourseNum,
+          'Name'        => course.Name,
+          'Institution' => course.Institution
+        }
+      end
+    end
+    halt 200, table.to_json if table.size != 0
+    halt 400, {'message': 'User has no courses'}.to_json
+  end
+
   
   # Read current users courses (AND the category the course falls in) from StudentCourses and Categories table.
   # Essentially, returns current_user.CatalogYear, {CourseDept, CourseNum, Name} from AllCourses
   # AND {MainCategory, CategoryNum, CategoryName} from Categories
   # Will calculate user GPA, Classification, Hours, AdvancedHours, and adv_cs_hours
-  get '/myCourses' do
+  get '/myDegreeProgress' do
     api_authenticate!
     #use current_user.id for current users id
 
@@ -571,11 +599,10 @@ end
     #CourseCategories to get CategoryID(s): catIDs = CourseCategories.all(CourseID: CourseID)
     #Search, in a loop, Categories.first(CategoryID: )
     courses.each do |i|
-      puts i.UserID
-      puts i.CourseID
+      
       #We already have the CourseID, but this Will also get the dept, num, and name
       course = AllCourses.first(CourseID: i.CourseID)
-      puts course.Name
+      
       #Get all the categories course may belong to
       if course
         catIDs = CourseCategories.all(CourseID: course.CourseID)
@@ -584,9 +611,7 @@ end
         #MainCategory, CategoryNum, and CategoryName
         catIDs.each do |j|
           cat = Categories.first(CategoryID: j.CategoryID)
-          puts cat.CategoryName
-          puts cat.CatalogYear
-          puts current_user.CatalogYear
+          
           if cat.CatalogYear == current_user.CatalogYear
             table << {
             'CatalogYear'   => current_user.CatalogYear,
@@ -599,6 +624,15 @@ end
             ###############################################################################################  
             ################FINISH CALCULATING GPA, CLASSIFICATION, HRS, ADVHRS, ADV CS HRS################
             ###############################################################################################
+          else
+            table << {
+              'CatalogYear'   => 'mismatch',
+              'CourseDept'    => course.CourseDept,
+              'CourseNum'     => course.CourseNum,
+              'Name'          => course.Name,
+              'MainCategory'  => cat.MainCategory,
+              'CategoryNum'   => cat.CategoryNum,
+              'CategoryName'  => cat.CategoryName}
           end
         end
       end
