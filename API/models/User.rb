@@ -1,3 +1,4 @@
+  
 require 'data_mapper'
 
 class User
@@ -9,7 +10,7 @@ class User
   property :LastName, String
   property :Password, String
   property :GPA, Float
-  property :CatalogYear, Integer
+  property :CatalogYear, String
   property :Classification, String
   property :Hours, Integer
   property :admin, Boolean, :default => false
