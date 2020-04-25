@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:nice_button/NiceButton.dart';
 import 'package:seniordesign/RegisterScreen.dart';
+import 'package:seniordesign/studentpages/DegreePageMimic.dart';
 import 'package:seniordesign/studentpages/StudentMainScreen.dart';
 import 'package:seniordesign/adminpages/AdminMainScreen.dart';
 import 'package:seniordesign/TestScreen.dart';
@@ -16,6 +17,7 @@ import 'package:http/http.dart' as http;
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:seniordesign/studentpages/StudentMainScreenMinor.dart';
+import 'package:seniordesign/studentpages/DegreePageMimic.dart';
 
 final storage = new FlutterSecureStorage();
 
@@ -205,10 +207,28 @@ class _LoginScreenState extends State<LoginScreen> {
                       },
                     ),
                   ),
+                  
                 ],
               ),
             ),
-          ],
+          Padding(
+                    padding: EdgeInsets.all(6),
+                    child: NiceButton(
+                      width: 240,
+                      elevation: 8.0,
+                      radius: 52.0,
+                      text: "DegreePlan Login",
+                      textColor: Color(0xffcf4411),
+                      background: Color(0xffebebe8),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => DegreePageMimic()),
+                        );
+                      },
+                    ),
+                  ),],
         ),
       ),
     );

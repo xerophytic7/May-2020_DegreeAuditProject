@@ -12,62 +12,59 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 final storage = new FlutterSecureStorage();
-
 final double perA = 0.32;
 
-// Future<Void> StudentInfo() async {
-//   //String username,password,fn,ln,id;
-//   String value = await storage.read(key: "token");
-//   print("This is the supposed Token $value");
-//   final response = await http.get(
-//     "$address/MyInfo",
-//     headers: {HttpHeaders.authorizationHeader: "Bearer $value"},
-//   );
+class Course {
+  final int courseID;
+  final String courseDept;
+  final int courseNum;
+  final String name;
+  final String institution;
+  final String grade;
+  final String semester;
 
-//   Map<String, dynamic> data = json.decode(response.body);
-//   print("return the JSON of info ==> $data");
+  Course( this.courseID, 
+          this.courseDept, 
+          this.courseNum, 
+          this.name,
+          this.institution,
+          this.grade,
+          this.semester
+          );
+}
 
-//   if(data["FirstName"] != "")      firstname       = data["FirstName"];
-//   if(data["LastName"] != "")       lastname        = data["LastName"];
-//   if(data["Email"] != "")          email           = data["Email"];
-//   if(data["GPA"] != "")            gpa             = data["GPA"];
-//   if(data["CatalogYear"] != "")    catalogyear     = data["CatalogYear"];
-//   if(data["Classification"] != "") classification  = data["Classification"];
-//   if(data["Hours"] != "")          hours           = data["Hours"];
-//   if(data["AdvancedCSHours"] != "")advancedcshours = data["AdvancedCsHours"];
-//   if(data["AdvancedHours"] != "")  advancedhours   = data["AdvancedHours"];
+Future<List<Course>> _getStudentCourses() async {
+  String value = await storage.read(key: "token");
 
-//   return null;
+  var response = await http.get(
+    "$address/myCourses",
+    headers: {HttpHeaders.authorizationHeader: "Bearer $value"},
+  );
 
-// }
+  if(response.statusCode != 200) return null;
 
+  var data = json.decode(response.body);
 
-  Future<List<Course>> _getStudentCourses() async {
-    String value = await storage.read(key: "token");
+  List<Course> courses = [];
 
-    var response = await http.get(
-      "$address/myCourses",
-      headers: {HttpHeaders.authorizationHeader: "Bearer $value"},
+  for (var i in data) {
+    
+    Course course = Course( i["CourseID"],
+                            i["CourseDept"], 
+                            i["CourseNum"], 
+                            i["Name"], 
+                            i["Institution"],
+                            i["Grade"],
+                            i["Semester"]
     );
 
-    var data = json.decode(response.body);
-
-    List<Course> courses = [];
-
-    for (var i in data) {
-      Course course = Course( i["CourseID"], 
-                              i["CourseDept"], 
-                              i["CourseNum"], 
-                              i["Name"], 
-                              i["Institution"]);
-                              
-      courses.add(course);
-      
-    }
-    print("This is the number of courses => ${courses.length}");
-    return courses;
-
+    courses.add(course);
+    
   }
+  print("This is the number of courses => ${courses.length}");
+  return courses;
+
+}
 
 class ViewClasses extends StatefulWidget {
   //ViewClasses({Key key, this.title}) : super(key: key);
@@ -151,13 +148,4 @@ class Student {
       this.advancedhours);
 }
 
-class Course {
-  final int courseID;
-  final String courseDept;
-  final int courseNum;
-  final String name;
-  final String institution;
 
-  Course(this.courseID, this.courseDept, this.courseNum, this.name,
-      this.institution);
-}

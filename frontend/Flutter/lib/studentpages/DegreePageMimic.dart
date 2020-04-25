@@ -1,20 +1,13 @@
 import 'dart:convert';
 import 'package:seniordesign/popup.dart';
-
 import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:percent_indicator/percent_indicator.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:seniordesign/globals/globals.dart';
 import 'dart:async';
-import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:seniordesign/popup.dart';
 
 final storage = new FlutterSecureStorage();
-
-final double perA = 0.32;
 
 class Student {
   final String firstname;
@@ -87,16 +80,16 @@ Future<List<Course>> _getCourses() async {
   return courses;
 }
 
-class AddAClass extends StatefulWidget {
-  //AddAClass({Key key, this.title}) : super(key: key);
+class DegreePageMimic extends StatefulWidget {
+  //DegreePageMimic({Key key, this.title}) : super(key: key);
 
   //final String title;
 
   @override
-  _AddAClassState createState() => new _AddAClassState();
+  _DegreePageMimicState createState() => new _DegreePageMimicState();
 }
 
-class _AddAClassState extends State<AddAClass> {
+class _DegreePageMimicState extends State<DegreePageMimic> {
   int statusCode = 0;
 
   @override
