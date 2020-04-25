@@ -9,6 +9,28 @@ import 'package:http/http.dart' as http;
 
 final storage = new FlutterSecureStorage();
 
+class SizeConfig {
+  static MediaQueryData _mediaQueryData;
+  static double screenWidth;
+  static double screenHeight;
+  static double blockSizeHorizontal;
+  static double blockSizeVertical;
+
+  void init(BuildContext context) {
+    _mediaQueryData = MediaQuery.of(context);
+    screenWidth = _mediaQueryData.size.width;
+    screenHeight = _mediaQueryData.size.height;
+    blockSizeHorizontal = screenWidth / 100;
+    blockSizeVertical = screenHeight / 100;
+  }
+  // Example
+  // Widget build(BuildContext context) {
+  //   SizeConfig().init(context);
+  //   double deviceWidth = SizeConfig.blockSizeHorizontal;
+  //   double deviceHeight = SizeConfig.blockSizeVertical;
+
+}
+
 class Student {
   final String firstname;
   final String lastname;
@@ -99,27 +121,26 @@ class _DegreePageMimicState extends State<DegreePageMimic> {
 
     // print(data);
     //need a future builder
-    return new Scaffold(
-      backgroundColor: Color(0xff65646a),
-      body: Container(
-          child: FutureBuilder(
-        future: _getCourses(),
-        builder: (BuildContext context, AsyncSnapshot snapshot) {
-          if (snapshot.data == null) {
-            return new Scaffold(
-              backgroundColor: Color(0xff65646a),
-              body: new Center(
-                child: new Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    Image.asset("assets/images/image0.png"),
-                  ],
-                ),
+    return new FutureBuilder(
+      future: _getCourses(),
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        if (snapshot.data == null) {
+          return new Scaffold(
+            backgroundColor: Color(0xff65646a),
+            body: new Center(
+              child: new Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Image.asset("assets/images/image0.png"),
+                ],
               ),
-            );
-          } else {
-            return ListView.builder(
+            ),
+          );
+        } else {
+          return Scaffold(
+            backgroundColor: Color(0xff65646a),
+            body: ListView.builder(
               itemCount: snapshot.data.length,
               itemBuilder: (BuildContext context, int i) {
                 return ListTile(
@@ -127,29 +148,18 @@ class _DegreePageMimicState extends State<DegreePageMimic> {
                       style: TextStyle(color: Color(0xffebebe8))),
                   subtitle: Text(
                       "${snapshot.data[i].courseDept} ${snapshot.data[i].courseNum}"),
-                  onTap: () => Popup(message: "hi"),
-                  trailing: FlatButton(
-                      onPressed: () => AlertDialog(
-                            title: new Text("Alert Dialog title"),
-                            content: new Text("Alert Dialog body"),
-                            actions: <Widget>[
-                              // usually buttons at the bottom of the dialog
-                              new FlatButton(
-                                child: new Text("Close"),
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                              ),
-                            ],
-                          ),
-                      child: Icon(Icons.add),
-                      splashColor: Color(0xffebebe8)),
+                  onTap: () => showDialog(
+                    context: context,
+                    builder: (_) => Popup(message: "Implement Later"),
+                  ),
+                  trailing: Text("+"),
+                  leading: Text("♥"),
                 );
               },
-            );
-          }
-        },
-      )),
+            ),
+          );
+        }
+      },
     );
   }
 }

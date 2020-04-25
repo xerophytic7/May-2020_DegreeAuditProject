@@ -7,7 +7,6 @@ import 'package:percent_indicator/percent_indicator.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:seniordesign/globals/globals.dart';
 import 'dart:async';
-import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 final storage = new FlutterSecureStorage();
