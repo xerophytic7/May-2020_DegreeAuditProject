@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:seniordesign/popup.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -31,6 +30,69 @@ class SizeConfig {
 
 }
 
+class Course {
+  final int courseID;
+  final String courseDept;
+  final int courseNum;
+  final String name;
+  final String institution;
+  final String grade;
+  final String semester;
+  final bool taken;
+
+  Course(this.courseID, this.courseDept, this.courseNum, this.name,
+      this.institution, this.grade, this.semester, this.taken);
+}
+
+Future<List<Course>> _getCourses() async {
+  String value = await storage.read(key: "token");
+
+  //A will have the entire courses
+  var responseA = await http.get(
+    "$address/all/Courses",
+    headers: {HttpHeaders.authorizationHeader: "Bearer $value"},
+  );
+  if (responseA.statusCode != 200) return null;
+  //B will have the taken Courses by the student
+  var responseB = await http.get(
+    "$address/myCourses",
+    headers: {HttpHeaders.authorizationHeader: "Bearer $value"},
+  );
+  if (responseB.statusCode != 200) return null;
+
+  var dataA = json.decode(responseA.body);
+  var dataB = json.decode(responseB.body);
+
+  List<Course> allCourses = [];
+  List<int> courseIDtoSkip = [];
+
+  for (var i in dataB) {
+    Course myCourse = Course(i["CourseID"], i["CourseDept"], i["CourseNum"],
+        i["Name"], i["Institution"], i["Grade"], i["Semester"], true);
+
+    allCourses.add(myCourse);
+    courseIDtoSkip.add(i["CourseID"]);
+  }
+
+  //Adds the rest of the courses except the it doesnt add the ones you have taken.
+  bool flag = true;
+  for (var i in dataA) {
+    for (var j in courseIDtoSkip) {
+      if (j == i["CourseID"]) {
+        flag = false;
+      }
+    }
+    if (flag) {
+      Course course = Course(i["CourseID"], i["CourseDept"], i["CourseNum"],
+          i["Name"], i["Institution"], "null", "null", false);
+      allCourses.add(course);
+    }
+    flag = true;
+  }
+
+  return allCourses;
+}
+
 class Student {
   final String firstname;
   final String lastname;
@@ -52,54 +114,6 @@ class Student {
       this.hours,
       this.advancedcshours,
       this.advancedhours);
-}
-
-class Course {
-  final int courseID;
-  final String courseDept;
-  final int courseNum;
-  final String name;
-  final String institution;
-
-  Course(this.courseID, this.courseDept, this.courseNum, this.name,
-      this.institution);
-}
-
-Future<List<dynamic>> CoursesInfo() async {
-  //String username,password,fn,ln,id;
-  String value = await storage.read(key: "token");
-  print("This is the supposed Token $value");
-  final response = await http.get(
-    "$address/all/Courses",
-    headers: {HttpHeaders.authorizationHeader: "Bearer $value"},
-  );
-
-  if (response.statusCode != 200) return null;
-
-  List<dynamic> data = json.decode(response.body);
-  return data;
-}
-
-Future<List<Course>> _getCourses() async {
-  String value = await storage.read(key: "token");
-
-  var response = await http.get(
-    "$address/all/Courses",
-    headers: {HttpHeaders.authorizationHeader: "Bearer $value"},
-  );
-
-  var data = json.decode(response.body);
-
-  List<Course> courses = [];
-
-  for (var i in data) {
-    Course course = Course(i["CourseID"], i["CourseDept"], i["CourseNum"],
-        i["Name"], i["Institution"]);
-
-    courses.add(course);
-  }
-  print("This is the number of courses => ${courses.length}");
-  return courses;
 }
 
 class DegreePageMimic extends StatefulWidget {
@@ -125,6 +139,7 @@ class _DegreePageMimicState extends State<DegreePageMimic> {
       future: _getCourses(),
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         if (snapshot.data == null) {
+          print("snapshot is null :O");
           return new Scaffold(
             backgroundColor: Color(0xff65646a),
             body: new Center(
@@ -138,6 +153,7 @@ class _DegreePageMimicState extends State<DegreePageMimic> {
             ),
           );
         } else {
+          print("snapshot is not null");
           return Scaffold(
             backgroundColor: Color(0xff65646a),
             body: ListView.builder(
@@ -150,10 +166,15 @@ class _DegreePageMimicState extends State<DegreePageMimic> {
                       "${snapshot.data[i].courseDept} ${snapshot.data[i].courseNum}"),
                   onTap: () => showDialog(
                     context: context,
-                    builder: (_) => Popup(message: "Implement Later"),
+                    builder: (_) => PopUpAdd(message: "Implement Later"),
                   ),
                   trailing: Text("+"),
-                  leading: Text("♥"),
+                  leading: Text((() {
+                    if (snapshot.data[i].taken == true) {
+                      return "✔️";
+                    }else
+                    return "❌";
+                  })()),
                 );
               },
             ),
@@ -163,3 +184,59 @@ class _DegreePageMimicState extends State<DegreePageMimic> {
     );
   }
 }
+
+class PopUpAdd extends StatefulWidget {
+  @override
+  final String message;
+  const PopUpAdd({Key key, this.message}) : super(key: key);
+
+  State<StatefulWidget> createState() => PopUpAddState();
+}
+
+class PopUpAddState extends State<PopUpAdd>
+    with SingleTickerProviderStateMixin {
+  AnimationController controller;
+  Animation<double> scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    controller =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 450));
+    scaleAnimation =
+        CurvedAnimation(parent: controller, curve: Curves.elasticInOut);
+
+    controller.addListener(() {
+      setState(() {});
+    });
+
+    controller.forward();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Material(
+        color: Colors.transparent,
+        child: ScaleTransition(
+          scale: scaleAnimation,
+          child: Container(
+            decoration: ShapeDecoration(
+                color: Colors.white,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15.0))),
+            child: Padding(
+              padding: const EdgeInsets.all(50.0),
+              child: Text(widget.message),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// (() {
+//   // your code here
+// }()),

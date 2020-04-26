@@ -1,6 +1,6 @@
 import 'dart:ffi';
 import 'dart:io';
-
+  
 import 'package:flutter/material.dart';
 import 'package:nice_button/NiceButton.dart';
 import 'package:seniordesign/RegisterScreen.dart';
@@ -184,8 +184,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         if (statusCode != 200) {
                           showDialog(
                             context: context,
-                            builder: (_) =>
-                                Popup(message: "Invalid Credentials"),
+                            // builder: (_) =>
+                            //     Popup(message: "Invalid Credentials"),
                           );
                         }
                         if (statusCode == 200 && admin == 0 && major == true) {

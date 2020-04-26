@@ -61,6 +61,7 @@ Future<List<Course>> _getStudentCourses() async {
     courses.add(course);
     
   }
+  
   print("This is the number of courses => ${courses.length}");
   return courses;
 

@@ -304,3 +304,4 @@ class _StudentMainScreenMinorState extends State<StudentMainScreenMinor> {
 // String advancedhours = "0";
 // String advancedcshours = "0";
 // double perA = 0.32;
+
