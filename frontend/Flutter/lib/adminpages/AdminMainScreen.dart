@@ -1,47 +1,35 @@
 import 'dart:convert';
-
 import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:percent_indicator/percent_indicator.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:nice_button/NiceButton.dart';
+import 'package:seniordesign/adminpages/viewSpecificStudent.dart';
 import 'package:seniordesign/globals/globals.dart';
 import 'dart:async';
 import 'package:http/http.dart' as http;
 
 final storage = new FlutterSecureStorage();
 
-String firstname = "USER";
-String lastname = "USER";
-String email = "USEREMAIL";
-double gpa = 0.0;
-String catalogyear = "####-####";
-String classification = "Undergrad";
-int hours = 0;
-int advancedhours = 0;
-int advancedcshours = 0;
+class SizeConfig {
+  static MediaQueryData _mediaQueryData;
+  static double screenWidth;
+  static double screenHeight;
+  static double blockSizeHorizontal;
+  static double blockSizeVertical;
 
-Future<String> StudentInfo() async {
-  //String username,password,fn,ln,id;
-  String value = await storage.read(key: "token");
-  print("This is the supposed Token $value");
-  final response = await http.get(
-    "${address}/MyInfo",
-    headers: {HttpHeaders.authorizationHeader: "Bearer ${value}"},
-  );
+  void init(BuildContext context) {
+    _mediaQueryData = MediaQuery.of(context);
+    screenWidth = _mediaQueryData.size.width;
+    screenHeight = _mediaQueryData.size.height;
+    blockSizeHorizontal = screenWidth / 100;
+    blockSizeVertical = screenHeight / 100;
+  }
 
-  Map<String, dynamic> data = json.decode(response.body);
-  print("return the JSON of info ==> $data");
-
-  firstname       = data["FirstName"];
-  lastname        = data["LastName"];
-  email           = data["Email"];
-  gpa             = data["GPA"];
-  catalogyear     = data["CatalogYear"];
-  classification  = data["Classification"];
-  hours           = data["Hours"];
-  advancedhours   = data["AdvancedHours"];
-  advancedcshours = data["AdvancedCsHours"];
+  // Example
+  // Widget build(BuildContext context) {
+  //   SizeConfig().init(context);
+  //   double deviceWidth = SizeConfig.blockSizeHorizontal;
+  //   double deviceHeight = SizeConfig.blockSizeVertical;
 
 }
 
@@ -55,177 +43,360 @@ class AdminMainScreen extends StatefulWidget {
 }
 
 class _AdminMainScreenState extends State<AdminMainScreen> {
-  int statusCode = 0;
   @override
   Widget build(BuildContext context) {
-    StudentInfo();
-    return new Scaffold(
-      backgroundColor: Color(0xff65646a),
-      body: new Center(
-        child: new Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
+    SizeConfig().init(context);
+    double deviceWidth = SizeConfig.blockSizeHorizontal;
+    double deviceHeight = SizeConfig.blockSizeVertical;
+    TextEditingController studentIdTextCtrl = TextEditingController();
+
+    return Scaffold(
+        backgroundColor: Color(0xff65646a),
+        body: ListView(
           children: <Widget>[
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Container(
-                  margin: const EdgeInsets.all(10.0),
-                  //color: Color(0xffebebe8),
-                  width: 48.0 * 8,
-                  height: 48.0 * 1,
-                  decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                          colors: [Color(0xffebebe8), Color(0xffebebe8)]),
-                      borderRadius: BorderRadius.circular(6.0),
-                      boxShadow: [
-                        BoxShadow(
-                            color: Colors.black.withOpacity(.3),
-                            offset: Offset(0.0, 8.0),
-                            blurRadius: 8.0)
-                      ]),
-                  child: (Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        new Text(" Welcome! $firstname $lastname",
-                            style: TextStyle(
-                                color: Color(0xffcf4411),
-                                fontWeight: FontWeight.bold)),
-
-                        ///Here
-                      ])),
-                ),
-              ],
-            ),
-            Row(
-              children: <Widget>[
-                Container(
-                  margin: const EdgeInsets.all(10.0),
-                  //color: Color(0xffebebe8),
-                  width: 48.0 * 8,
-                  height: 48.0 * 3,
-                  decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                          colors: [Color(0xffebebe8), Color(0xffebebe8)]),
-                      borderRadius: BorderRadius.circular(6.0),
-                      boxShadow: [
-                        BoxShadow(
-                            color: Colors.black.withOpacity(.3),
-                            offset: Offset(0.0, 8.0),
-                            blurRadius: 8.0)
-                      ]),
-                  child: (Row(
-                    children: <Widget>[
-                      Padding(
-                        padding: EdgeInsets.all(10),
-                        child: new CircularPercentIndicator(
-                          radius: 100.0,
-                          lineWidth: 12.0,
-                          percent: 0.9,
-                          center: new Text("10%",
-                              style: TextStyle(
-                                  color: Color(0xffcf4411), fontSize: 30)),
-                          progressColor: Color(0xffcf4411),
-                          backgroundColor: Color(0xffebebe8),
-                        ),
+            Container(
+              margin: EdgeInsets.fromLTRB(deviceWidth * 1, deviceHeight * 4,
+                  deviceWidth * 1, deviceHeight * 1),
+              width: deviceHeight * 100,
+              height: deviceHeight * 30,
+              decoration: BoxDecoration(color: Color(0xffebebe8), boxShadow: [
+                BoxShadow(
+                    color: Colors.black.withOpacity(.3),
+                    offset: Offset(0.0, 8.0),
+                    blurRadius: 8.0)
+              ]),
+              child: ListView(children: [
+                Padding(
+                  padding: EdgeInsets.all(0),
+                  child: new TextFormField(
+                    decoration: new InputDecoration(
+                      //labelText: "Enter Username",
+                      hintText: "Student's Email",
+                      fillColor: Colors.white,
+                      border: new OutlineInputBorder(
+                        borderRadius: new BorderRadius.circular(1),
+                        borderSide: new BorderSide(),
                       ),
-                      Column(children: [
-                        Text("10%",
-                            style: TextStyle(
-                                color: Color(0xffcf4411), fontSize: 30)),
-                      ]),
-                      Column(children: [
-                        Text("10%",
-                            style: TextStyle(
-                                color: Color(0xffcf4411), fontSize: 30)),
-                      ]),
-                    ],
-                  )),
+                      //fillColor: Colors.green
+                    ),
+                    style: new TextStyle(
+                      fontFamily: "Poppins",
+                    ),
+                    controller: studentIdTextCtrl,
+                  ),
                 ),
-              ],
+                Row(
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(deviceHeight * 5,
+                          deviceHeight * 4, deviceWidth * 1, deviceHeight * 1),
+                      child: NiceButton(
+                        background: Color(0xffebebe8),
+                        text: "Student's \nInfo",
+                        textColor: Color(0xffcf4411),
+                        fontSize: deviceWidth * 5,
+                        width: deviceWidth * 30,
+                        elevation: deviceHeight * 1,
+                        //icon: Icons.call_made,
+                        //iconColor: Color(0xffcf4411),
+                        onPressed: () async {
+                          String studentId;
+                          await storage.write(
+                              key: studentId, value: studentIdTextCtrl.text);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => SpecificStudent()),
+                          );
+                        },
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(deviceHeight * 1,
+                          deviceHeight * 4, deviceWidth * 4, deviceHeight * 1),
+                      child: NiceButton(
+                        background: Color(0xffebebe8),
+                        text: "Planned\n Courses",
+                        textColor: Color(0xffcf4411),
+                        fontSize: deviceWidth * 5,
+                        width: deviceWidth * 30,
+                        elevation: deviceHeight * 1,
+                        //icon: Icons.call_made,
+                        //iconColor: Color(0xffcf4411),
+                        onPressed: () async {
+                          String studentId;
+                          await storage.write(
+                              key: studentId, value: studentIdTextCtrl.text);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => SpecificStudent()),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                )
+              ]),
             ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Container(
-                  margin: const EdgeInsets.all(10.0),
-                  //color: Color(0xffebebe8),
-                  width: 48.0 * 8,
-                  height: 48.0 * 9,
-                  decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                          colors: [Color(0xffebebe8), Color(0xffebebe8)]),
-                      borderRadius: BorderRadius.circular(6.0),
-                      boxShadow: [
-                        BoxShadow(
-                            color: Colors.black.withOpacity(.3),
-                            offset: Offset(0.0, 8.0),
-                            blurRadius: 8.0)
-                      ]),
-                  child: (Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: <Widget>[
-                        Row(
-                          children: <Widget>[
-                            Padding(
-                              padding: EdgeInsets.all(10),
-                              child: new CircularPercentIndicator(
-                                radius: 100.0,
-                                lineWidth: 12.0,
-                                percent: 0.9,
-                                center: new Text("General\n Core",
-                                    style: TextStyle(color: Color(0xffcf4411))),
-                                progressColor: Color(0xffcf4411),
-                                backgroundColor: Color(0xffebebe8),
-                              ),
-                            ),
-                          ],
-                        ),
-                        Row(
-                          children: <Widget>[
-                            Padding(
-                              padding: EdgeInsets.all(10),
-                              child: new CircularPercentIndicator(
-                                radius: 100.0,
-                                lineWidth: 12.0,
-                                percent: 0.9,
-                                center: new Text("General\n Core",
-                                    style: TextStyle(color: Color(0xffcf4411))),
-                                progressColor: Color(0xffcf4411),
-                                backgroundColor: Color(0xffebebe8),
-                              ),
-                            ),
-                          ],
-                        ),
-                        Row(
-                          children: <Widget>[
-                            Padding(
-                              padding: EdgeInsets.all(10),
-                              child: new CircularPercentIndicator(
-                                radius: 100.0,
-                                lineWidth: 12.0,
-                                percent: 0.9,
-                                center: new Text("General\n Core",
-                                    style: TextStyle(color: Color(0xffcf4411))),
-                                progressColor: Color(0xffcf4411),
-                                backgroundColor: Color(0xffebebe8),
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        ///Here
-                      ])),
+            Container(
+              margin: EdgeInsets.fromLTRB(deviceWidth * 1, deviceHeight * 1,
+                  deviceWidth * 1, deviceHeight * 1),
+              width: deviceHeight * 100,
+              height: deviceHeight * 30,
+              decoration: BoxDecoration(color: Color(0xffebebe8), boxShadow: [
+                BoxShadow(
+                    color: Colors.black.withOpacity(.3),
+                    offset: Offset(0.0, 8.0),
+                    blurRadius: 8.0)
+              ]),
+              child: ListView(children: [
+                Padding(
+                  padding: EdgeInsets.all(0),
+                  child: new TextFormField(
+                    decoration: new InputDecoration(
+                      //labelText: "Enter Username",
+                      hintText: "StudentID",
+                      fillColor: Colors.white,
+                      border: new OutlineInputBorder(
+                        borderRadius: new BorderRadius.circular(1),
+                        borderSide: new BorderSide(),
+                      ),
+                      //fillColor: Colors.green
+                    ),
+                    style: new TextStyle(
+                      fontFamily: "Poppins",
+                    ),
+                    controller: studentIdTextCtrl,
+                  ),
                 ),
-              ],
+                Row(
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(deviceHeight * 5,
+                          deviceHeight * 4, deviceWidth * 1, deviceHeight * 1),
+                      child: NiceButton(
+                        background: Color(0xffebebe8),
+                        text: "Student's \nInfo",
+                        textColor: Color(0xffcf4411),
+                        fontSize: deviceWidth * 5,
+                        width: deviceWidth * 30,
+                        elevation: deviceHeight * 1,
+                        //icon: Icons.call_made,
+                        //iconColor: Color(0xffcf4411),
+                        onPressed: () async {
+                          String studentId;
+                          await storage.write(
+                              key: studentId, value: studentIdTextCtrl.text);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => SpecificStudent()),
+                          );
+                        },
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(deviceHeight * 1,
+                          deviceHeight * 4, deviceWidth * 4, deviceHeight * 1),
+                      child: NiceButton(
+                        background: Color(0xffebebe8),
+                        text: "Planned\n Courses",
+                        textColor: Color(0xffcf4411),
+                        fontSize: deviceWidth * 5,
+                        width: deviceWidth * 30,
+                        elevation: deviceHeight * 1,
+                        //icon: Icons.call_made,
+                        //iconColor: Color(0xffcf4411),
+                        onPressed: () async {
+                          String studentId;
+                          await storage.write(
+                              key: studentId, value: studentIdTextCtrl.text);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => SpecificStudent()),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                )
+              ]),
             ),
+            Container(
+              margin: EdgeInsets.fromLTRB(deviceWidth * 1, deviceHeight * 1,
+                  deviceWidth * 1, deviceHeight * 1),
+              width: deviceHeight * 100,
+              height: deviceHeight * 30,
+              decoration: BoxDecoration(color: Color(0xffebebe8), boxShadow: [
+                BoxShadow(
+                    color: Colors.black.withOpacity(.3),
+                    offset: Offset(0.0, 8.0),
+                    blurRadius: 8.0)
+              ]),
+              child: ListView(children: [
+                Padding(
+                  padding: EdgeInsets.all(0),
+                  child: new TextFormField(
+                    decoration: new InputDecoration(
+                      //labelText: "Enter Username",
+                      hintText: "StudentID",
+                      fillColor: Colors.white,
+                      border: new OutlineInputBorder(
+                        borderRadius: new BorderRadius.circular(1),
+                        borderSide: new BorderSide(),
+                      ),
+                      //fillColor: Colors.green
+                    ),
+                    style: new TextStyle(
+                      fontFamily: "Poppins",
+                    ),
+                    controller: studentIdTextCtrl,
+                  ),
+                ),
+                Row(
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(deviceHeight * 5,
+                          deviceHeight * 4, deviceWidth * 1, deviceHeight * 1),
+                      child: NiceButton(
+                        background: Color(0xffebebe8),
+                        text: "Student's \nInfo",
+                        textColor: Color(0xffcf4411),
+                        fontSize: deviceWidth * 5,
+                        width: deviceWidth * 30,
+                        elevation: deviceHeight * 1,
+                        //icon: Icons.call_made,
+                        //iconColor: Color(0xffcf4411),
+                        onPressed: () async {
+                          String studentId;
+                          await storage.write(
+                              key: studentId, value: studentIdTextCtrl.text);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => SpecificStudent()),
+                          );
+                        },
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(deviceHeight * 1,
+                          deviceHeight * 4, deviceWidth * 4, deviceHeight * 1),
+                      child: NiceButton(
+                        background: Color(0xffebebe8),
+                        text: "Planned\n Courses",
+                        textColor: Color(0xffcf4411),
+                        fontSize: deviceWidth * 5,
+                        width: deviceWidth * 30,
+                        elevation: deviceHeight * 1,
+                        //icon: Icons.call_made,
+                        //iconColor: Color(0xffcf4411),
+                        onPressed: () async {
+                          String studentId;
+                          await storage.write(
+                              key: studentId, value: studentIdTextCtrl.text);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => SpecificStudent()),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                )
+              ]),
+            )
           ],
-        ),
-      ),
-    );
+        ));
   }
+}
+
+////////////////////////////////////////////////////////////////
+class Course {
+  final int courseID;
+  final String courseDept;
+  final int courseNum;
+  final String name;
+  final String institution;
+  final String grade;
+  final String semester;
+  final bool taken;
+
+  Course(this.courseID, this.courseDept, this.courseNum, this.name,
+      this.institution, this.grade, this.semester, this.taken);
+}
+
+Future<List<Course>> _getCourses() async {
+  String value = await storage.read(key: "token");
+
+  //A will have the entire courses
+  var responseA = await http.get(
+    "$address/all/Courses",
+    headers: {HttpHeaders.authorizationHeader: "Bearer $value"},
+  );
+  if (responseA.statusCode != 200) return null;
+  //B will have the taken Courses by the student
+  var responseB = await http.get(
+    "$address/myCourses",
+    headers: {HttpHeaders.authorizationHeader: "Bearer $value"},
+  );
+  if (responseB.statusCode != 200) return null;
+
+  var dataA = json.decode(responseA.body);
+  var dataB = json.decode(responseB.body);
+
+  List<Course> allCourses = [];
+  List<int> courseIDtoSkip = [];
+
+  for (var i in dataB) {
+    Course myCourse = Course(i["CourseID"], i["CourseDept"], i["CourseNum"],
+        i["Name"], i["Institution"], i["Grade"], i["Semester"], true);
+
+    allCourses.add(myCourse);
+    courseIDtoSkip.add(i["CourseID"]);
+  }
+
+  //Adds the rest of the courses except the it doesnt add the ones you have taken.
+  bool flag = true;
+  for (var i in dataA) {
+    for (var j in courseIDtoSkip) {
+      if (j == i["CourseID"]) {
+        flag = false;
+      }
+    }
+    if (flag) {
+      Course course = Course(i["CourseID"], i["CourseDept"], i["CourseNum"],
+          i["Name"], i["Institution"], "null", "null", false);
+      allCourses.add(course);
+    }
+    flag = true;
+  }
+
+  return allCourses;
+}
+
+class Student {
+  final String firstname;
+  final String lastname;
+  final String email;
+  final String gpa;
+  final String catalogyear;
+  final String classification;
+  final String hours;
+  final String advancedhours;
+  final String advancedcshours;
+
+  Student(
+      this.firstname,
+      this.lastname,
+      this.email,
+      this.gpa,
+      this.catalogyear,
+      this.classification,
+      this.hours,
+      this.advancedcshours,
+      this.advancedhours);
 }

@@ -1,6 +1,6 @@
 import 'dart:ffi';
 import 'dart:io';
-  
+
 import 'package:flutter/material.dart';
 import 'package:nice_button/NiceButton.dart';
 import 'package:seniordesign/RegisterScreen.dart';
@@ -46,22 +46,30 @@ class SizeConfig {
 TextEditingController usernameTextCtrl = TextEditingController();
 TextEditingController passwordTextCtrl = TextEditingController();
 
-int admin = 0;
-bool major = true;
-
-Future<Void> iSadmin() async {
+Future<int> isMinor() async {
   //String username,password,fn,ln,id;
 
   final response = await http.get("$address/isAdmin", headers: {
     HttpHeaders.authorizationHeader: "${await storage.read(key: "token")}"
   });
   print(await storage.read(key: "token"));
-  admin = 0;
   if (response.statusCode == 200 &&
-      json.decode(response.body)["admin"] == "true") admin = 1;
+      json.decode(response.body)["mode"] == "minor") return 1;
+  return 0;
+}
+
+Future<int> isAdmin() async {
+  //String username,password,fn,ln,id;
+
+  final response = await http.get("$address/isAdmin", headers: {
+    HttpHeaders.authorizationHeader: "${await storage.read(key: "token")}"
+  });
+  print(await storage.read(key: "token"));
+
   if (response.statusCode == 200 &&
-      json.decode(response.body)["mode"] == "minor") major = false;
-  return null;
+      json.decode(response.body)["admin"] == "true") return 1;
+
+  return 0;
 }
 
 Future<int> code() async {
@@ -82,6 +90,7 @@ Future<int> code() async {
   if (response.statusCode != null) {
     return response.statusCode;
   }
+  return 0;
 }
 
 class LoginScreen extends StatefulWidget {
@@ -95,6 +104,8 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   int statusCode = 0;
+  int admin = 0;
+  int major = 1;
   @override
   Widget build(BuildContext context) {
     SizeConfig().init(context);
@@ -180,7 +191,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       background: Color(0xffcf4411),
                       onPressed: () async {
                         statusCode = await code();
-                        iSadmin();
+                        admin = await isAdmin();
+                        major = await isMinor();
                         if (statusCode != 200) {
                           showDialog(
                             context: context,
@@ -188,14 +200,14 @@ class _LoginScreenState extends State<LoginScreen> {
                             //     Popup(message: "Invalid Credentials"),
                           );
                         }
-                        if (statusCode == 200 && admin == 0 && major == true) {
+                        if (statusCode == 200 && admin == 0 && major == 1) {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
                                 builder: (context) => StudentMainScreen()),
                           );
                         }
-                        if (statusCode == 200 && admin == 0 && major == false) {
+                        if (statusCode == 200 && admin == 0 && major == 0) {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -203,6 +215,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           );
                         }
                         if (statusCode == 200 && admin == 1) {
+                          print("ADMIN");
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -248,6 +261,26 @@ class _LoginScreenState extends State<LoginScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => DegreePageMimic()),
+                  );
+                },
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(deviceHeight * 1, deviceHeight * 1,
+                  deviceWidth * 1, deviceWidth * 1),
+              child: NiceButton(
+                width: deviceWidth * 60,
+                elevation: 8,
+                radius: 52.0,
+                text: "Admin",
+                textColor: Color(0xffcf4411),
+                background: Color(0xffebebe8),
+                onPressed: () async {
+                  statusCode = await code();
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => AdminMainScreen()),
                   );
                 },
               ),
