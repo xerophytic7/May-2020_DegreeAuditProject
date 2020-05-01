@@ -162,7 +162,7 @@ nowuiDashboard = {
 
     $.notify({
       icon: "now-ui-icons ui-1_bell-53",
-      message: "Welcome to <b>Now Ui Dashboard</b> - a beautiful freebie for every web developer."
+      message: "You selected Advisor 1"
 
     }, {
       type: color,

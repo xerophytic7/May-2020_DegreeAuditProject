@@ -1,9 +1,17 @@
-
+/*
+*This is the client side server it serves the pages and connects to the api
+*you need to install dependencies by running npm install
+*then run the server with "node server.js" or "nodemon server.js" 
+*you can view the page at http://localhost:3002
+*make sure your API server is also running to be able to connect to it
+*I use handlebars to inject all html pages into main.html
+*I also use handlebars to inject the information from the api into the html views
+* 
+*/
 //___________________________Server setup_________________
 const express = require('express');
 const path = require('path');
-//const request = require('request');
-const axios = require('axios').default;
+const axios = require('axios').default;//for jwt request to api
 var hbs = require( 'express-handlebars');
 
 app = express();
@@ -70,7 +78,8 @@ app.get('/home', (req, res) => {
 
 //get login page
 app.get('/login', (req, res) => {
-    res.render("login");
+    //hide main.html content by sending false
+    res.render("login", {show: null});
 });
 
 //get register page
@@ -117,7 +126,7 @@ app.post('/register', (req, res) => {
     .catch(function (error) {
         console.log(error);
          //if succsesful
-        //res.redirect("/login");
+        res.redirect("/login");
     });
 });
 
