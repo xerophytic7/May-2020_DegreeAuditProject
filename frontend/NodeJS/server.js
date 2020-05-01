@@ -11,11 +11,16 @@
 //___________________________Server setup_________________
 const express = require('express');
 const path = require('path');
+const cookieParser = require('cookie-parser');
 const axios = require('axios').default;//for jwt request to api
 var hbs = require( 'express-handlebars');
 
 app = express();
 app.set('port', 3002);
+
+// add middleware to expose and manipulate cookie data in
+//  the request/response
+app.use(cookieParser());
 
 // setup handlebars and the view engine for res.render calls
 app.set('view engine', 'html');
@@ -43,7 +48,7 @@ const url = require('url');
 app.get('/home', (req, res) => {
     console.log("home token: "+req.query.token);
 
-    //get all the courses usin token
+    //get all the courses using token
     axios.get(`http://localhost:4567/all/Courses`, {
         headers:{
             'Authorization': `bearer ${req.query.token}`
@@ -94,7 +99,34 @@ app.get('/advising', (req, res) => {
 
 //get future_courses page
 app.get('/future_courses', (req, res) => {
-    res.render("future_courses",{active: { future_courses: true },page: "Future Courses"});
+     console.log("cookie token: "+req.cookies["token"]);
+     //get all the courses using token
+     axios.get(`http://localhost:4567/all/Courses`, {
+        headers:{
+            'Authorization': `bearer ${req.cookies["token"]}`
+        }        
+    }).then(function (response) {
+        // handle success
+        console.log("courses: "+JSON.stringify(response["data"]));
+        let courses = response["data"];
+        console.log("courses variable: "+courses);
+        //render page with courses 
+        res.render("future_courses",{active: 
+            { future_courses: true },
+            page: "Future Courses",
+            courses: courses    
+        });
+
+      })
+      .catch(function (error) {
+        // handle error
+        console.log(error);
+      })
+
+
+
+   
+    // res.render("future_courses",{active: { future_courses: true },page: "Future Courses"});
 });
 
 //get notifications page
@@ -144,7 +176,8 @@ app.post('/login', (req, res) => {
          //if succsesful
         const token = response['data'].token;
         console.log("login token: "+token);
-        // res.redirect("/home"+token);
+       //store token in cookie
+       res.cookie("token", token);
         //redirect user to home page with token
         res.redirect(url.format({
             pathname:"/home",

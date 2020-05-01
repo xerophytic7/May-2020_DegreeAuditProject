@@ -8,31 +8,21 @@
       <div class="col-md-12"">
         <div class="card ">
           <div class="card-header ">
-          <h5 class="card-category">Select you courses</h5>
-          <h4 class="card-title">Computer science core classes</h4>
+          <h5 class="card-category">Select you courses – 35 hours (21 advanced)</h5>
+          <h4 class="card-title">Computer science core  </h4>
           </div>
           <div class="card-body ">
             <div class="table-full-width table-responsive">
-              <table class="table">
-              <thead class=" text-primary">
-              <th>
-              Selected
-              </th>
-              <th>
-                Course Title
-              </th>
-              <th>
-                Description
-              </th>
-              <th>
-                Semester Date
-              </th>
-
-              <th class="text-right">
-               Credits 
-              </th>
+            <table class="table">
+            <thead class=" text-primary">
+              <th> Selected </th>
+              <th> Course Title</th>
+              <th> Description</th>
+              <th> Semester Date</th>
+              <th class="text-right"> Credits  </th>
             </thead>
                 <tbody>
+                  {{#courses}}  
                   <tr>
                     <td>
                       <div class="form-check">
@@ -42,44 +32,22 @@
                         </label>
                       </div>
                     </td>
-                    <td class="text-left">CSCI 4325 </td>
-                    <td class="text-left">Automata </td>
-                    <td class="text-left">Fall 2020 </td>
-                    <td class="text-right">3.00 </td>
-                    
+                    <td class="text-left">{{CourseDept}}</td>
+                    <td class="text-left">{{CourseNum}} {{Name}} </td>
+                    <td class="text-left">{{Institution}}</td>
+                    <td class="text-right">{{credits}}</td>
                   </tr>
+                  {{/courses}}
                   <tr>
-                    <td>
-                      <div class="form-check">
-                        <label class="form-check-label">
-                          <input class="form-check-input" type="checkbox">
-                          <span class="form-check-sign"></span>
-                        </label>
-                      </div>
-                    </td>
-                    
-                    <td class="text-left">CSCI 4325 </td>
-                    <td class="text-left">Automata </td>
-                    <td class="text-left">Fall 2020 </td>
-                    <td class="text-right">3.00 </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div class="form-check">
-                        <label class="form-check-label">
-                          <input class="form-check-input" type="checkbox" checked>
-                          <span class="form-check-sign"></span>
-                        </label>
-                      </div>
-                    </td>
-                    <td class="text-left">CSCI 4325 </td>
-                    <td class="text-left">Automata </td>
-                    <td class="text-left">Fall 2020 </td>
-                    <td class="text-right">3.00 </td>
-                    </td>
-                   
+                    <td class="text-left"> </td>
+                    <td class="text-left"> </td>
+                    <td class="text-left"></td>
+                    <td class="text-left"></td>
+                    <td class="text-right">
+                      <p class="text-center"></p><button type="submit" class="btn btn-fill btn-primary ">Submit</button></p>
                     </td>
                   </tr>
+                 
                 </tbody>
               </table>
             </div>
@@ -96,29 +64,18 @@
 <div class="col-md-12">
   <div class="card ">
     <div class="card-header ">
-    <h5 class="card-category">Select you courses</h5>
+    <h5 class="card-category">Select you courses – 3 hours</h5>
     <h4 class="card-title">Math core classes</h4>
     </div>
     <div class="card-body ">
       <div class="table-full-width table-responsive">
         <table class="table">
         <thead class=" text-primary">
-        <th>
-        Selected
-        </th>
-        <th>
-          Course Title
-        </th>
-        <th>
-          Description
-        </th>
-        <th>
-          Semester Date
-        </th>
-
-        <th class="text-right">
-         Credits 
-        </th>
+          <th> Selected </th>
+          <th> Course Title</th>
+          <th> Description</th>
+          <th> Semester Date</th>
+          <th class="text-right"> Credits  </th>
       </thead>
           <tbody>
             <tr>
@@ -136,38 +93,8 @@
               <td class="text-right">3.00 </td>
               
             </tr>
-            <tr>
-              <td>
-                <div class="form-check">
-                  <label class="form-check-label">
-                    <input class="form-check-input" type="checkbox">
-                    <span class="form-check-sign"></span>
-                  </label>
-                </div>
-              </td>
-              
-              <td class="text-left">CSCI 4325 </td>
-              <td class="text-left">Automata </td>
-              <td class="text-left">Fall 2020 </td>
-              <td class="text-right">3.00 </td>
-            </tr>
-            <tr>
-              <td>
-                <div class="form-check">
-                  <label class="form-check-label">
-                    <input class="form-check-input" type="checkbox" checked>
-                    <span class="form-check-sign"></span>
-                  </label>
-                </div>
-              </td>
-              <td class="text-left">CSCI 4325 </td>
-              <td class="text-left">Automata </td>
-              <td class="text-left">Fall 2020 </td>
-              <td class="text-right">3.00 </td>
-              </td>
-             
-              </td>
-            </tr>
+         
+          
           </tbody>
         </table>
       </div>
