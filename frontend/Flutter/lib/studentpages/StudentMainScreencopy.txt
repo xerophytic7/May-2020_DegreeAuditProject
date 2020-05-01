@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ffi';
 
 import 'dart:io';
 
@@ -7,6 +8,7 @@ import 'package:percent_indicator/percent_indicator.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:seniordesign/globals/globals.dart';
 import 'dart:async';
+import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 final storage = new FlutterSecureStorage();
@@ -14,51 +16,95 @@ final storage = new FlutterSecureStorage();
 String firstname = "USER";
 String lastname = "USER";
 String email = "USEREMAIL";
-double gpa = 0.0;
+String gpa = "0.0";
 String catalogyear = "####-####";
 String classification = "Undergrad";
-int hours = 0;
-int advancedhours = 0;
-int advancedcshours = 0;
+String hours = "0";
+String advancedhours = "0";
+String advancedcshours = "0";
+double perA = 0.32;
 
-Future<String> StudentInfo() async {
+
+class Student {
+  final String firstname;
+  final String lastname;
+  final String email;
+  final String gpa;
+  final String catalogyear;
+  final String classification;
+  final String hours;
+  final String advancedhours;
+  final String advancedcshours;
+
+  Student(
+      this.firstname,
+      this.lastname,
+      this.email,
+      this.gpa,
+      this.catalogyear,
+      this.classification,
+      this.hours,
+      this.advancedcshours,
+      this.advancedhours
+      );
+}
+
+Future<Student> studentInfo() async {
   //String username,password,fn,ln,id;
   String value = await storage.read(key: "token");
   print("This is the supposed Token $value");
   final response = await http.get(
-    "${address}/MyInfo",
-    headers: {HttpHeaders.authorizationHeader: "Bearer ${value}"},
+    "$address/MyInfo",
+    headers: {HttpHeaders.authorizationHeader: "Bearer $value"},
   );
 
-  Map<String, dynamic> data = json.decode(response.body);
+  var data = json.decode(response.body);
+
   print("return the JSON of info ==> $data");
 
-  firstname       = data["FirstName"];
-  lastname        = data["LastName"];
-  email           = data["Email"];
-  gpa             = data["GPA"];
-  catalogyear     = data["CatalogYear"];
-  classification  = data["Classification"];
-  hours           = data["Hours"];
-  advancedhours   = data["AdvancedHours"];
-  advancedcshours = data["AdvancedCsHours"];
+
+  // if(data["FirstName"] != "")      firstname       = data["FirstName"];
+  // if(data["LastName"] != "")       lastname        = data["LastName"];
+  // if(data["Email"] != "")          email           = data["Email"];
+  // if(data["GPA"] != "")            gpa             = data["GPA"];
+  // if(data["CatalogYear"] != "")    catalogyear     = data["CatalogYear"];   
+  // if(data["Classification"] != "") classification  = data["Classification"]; 
+  // if(data["Hours"] != "")          hours           = data["Hours"];
+  // if(data["AdvancedCSHours"] != "")advancedcshours = data["AdvancedCsHours"];
+  // if(data["AdvancedHours"] != "")  advancedhours   = data["AdvancedHours"];
+
+
+  
+  Student student = Student(  data["FirstName"],
+                              data["LastName"],
+                              data["Email"], 
+                              data["GPA"], 
+                              data["CatalogYear"], 
+                              data["Classification"],
+                              data["Hours"], 
+                              data["AdvancedCsHours"], 
+                              data["AdvancedHours"]
+  );
+
+  return student;
 
 }
 
-class AdminMainScreen extends StatefulWidget {
-  //AdminMainScreen({Key key, this.title}) : super(key: key);
+class StudentMainScreen extends StatefulWidget {
+  //StudentMainScreen({Key key, this.title}) : super(key: key);
 
   //final String title;
 
   @override
-  _AdminMainScreenState createState() => new _AdminMainScreenState();
+  _StudentMainScreenState createState() => new _StudentMainScreenState();
 }
 
-class _AdminMainScreenState extends State<AdminMainScreen> {
+class _StudentMainScreenState extends State<StudentMainScreen> {
+  
   int statusCode = 0;
   @override
   Widget build(BuildContext context) {
-    StudentInfo();
+    studentInfo();
     return new Scaffold(
       backgroundColor: Color(0xff65646a),
       body: new Center(
@@ -89,7 +135,7 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        new Text(" Welcome! $firstname $lastname",
+                        new Text(" Welcome! TEST TEST}",
                             style: TextStyle(
                                 color: Color(0xffcf4411),
                                 fontWeight: FontWeight.bold)),
@@ -123,8 +169,8 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
                         child: new CircularPercentIndicator(
                           radius: 100.0,
                           lineWidth: 12.0,
-                          percent: 0.9,
-                          center: new Text("10%",
+                          percent: 0,
+                          center: new Text("0",
                               style: TextStyle(
                                   color: Color(0xffcf4411), fontSize: 30)),
                           progressColor: Color(0xffcf4411),

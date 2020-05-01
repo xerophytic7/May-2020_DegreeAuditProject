@@ -4,10 +4,10 @@ class Categories
   include DataMapper::Resource
   
   property :CategoryID, Serial
-  property :CategoryNum, Integer
+  property :MainCategory, String
+  property :CategoryNum, String
   property :CategoryName, String
-  property :CatalogYear, Integer
+  property :CatalogYear, String
   property :ReqHours, Integer
+  property :AdvHours, Integer
 end
-
-
