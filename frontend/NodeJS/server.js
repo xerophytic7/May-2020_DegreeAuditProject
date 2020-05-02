@@ -46,7 +46,7 @@ const url = require('url');
 
 //______________________________________________________________________________
 
-//get home page
+//get home page___________________________________________________________________
 app.get('/home', (req, res) => {
 
     //get all the courses using token
@@ -75,18 +75,18 @@ app.get('/home', (req, res) => {
 
 });
 
-//get login page
+//get login page____________________________________________________________
 app.get('/login', (req, res) => {
     //hide main.html content by sending false
     res.render("login", {layout: false});
 });
 
-//get register page
+//get register page_______________________________________________________________________
 app.get('/register', (req, res) => {
     res.render("register",{layout: false});
 });
 
-//get advising page
+//get advising page______________________________________________________________________
 app.get('/advising', (req, res) => {
     res.render("advising",{active: 
         { advising: true },
@@ -96,7 +96,7 @@ app.get('/advising', (req, res) => {
 
 
 
-//get future_courses page
+//get future_courses page___________________________________________________________
 app.get('/future_courses', (req, res) => {
      console.log("cookie token: "+req.cookies["token"]);
      //get all the courses using token
@@ -123,18 +123,42 @@ app.get('/future_courses', (req, res) => {
 
 });
 
-//get notifications page
+//get notifications page______________________________________________________________
 app.get('/notifications', (req, res) => {
     res.render("notifications",{active: { notifications: true },page: "Notifications"});
 });
 
-//get user_profile page
+//get user_profile page__________________________________________________________________
 app.get('/user_profile', (req, res) => {
-    res.render("user_profile",{active: { user_profile: true },page: "User Profile"});
+    //get user information
+    axios.get(`http://localhost:4567/MyInfo`, {
+        headers:{
+            'Authorization': `bearer ${req.cookies["token"]}`
+        }        
+    }).then(function (response) {
+        // handle success
+        console.log("MyInfo: "+JSON.stringify(response["data"]));
+        let MyInfo = response["data"];
+        console.log("MyInfo variable: "+MyInfo);
+        //render page with courses 
+        res.render("user_profile",
+        {active: { user_profile: true },
+        page: "User Profile",
+        MyInfo: MyInfo    
+        });
+      })
+      .catch(function (error) {
+        // return error to notify user
+        console.log(error);
+        res.render("user_profile",
+        {active: { user_profile: true },
+        page: "User Profile"
+        });
+      })
 });
 
 
-//add courses that users plan to take in the next semester (veryfied by advisor)
+//add courses that users plan to take in the next semester (veryfied by advisor)________________
 //http://localhost:4567/update/Student_Courses/
 //req.body.courses contains the course id to be added
 app.post('/add_courses', (req, res) => {
@@ -161,7 +185,7 @@ app.post('/add_courses', (req, res) => {
  
  
 
-//register a new user with the api
+//register a new user with the api____________________________________________________
 // http://localhost:4567/api/register
 app.post('/register', (req, res) => {
     let username = req.body.username.trim();
@@ -186,7 +210,7 @@ app.post('/register', (req, res) => {
 
 
 
-//get login information from api
+//get login information from api_________________________________________________________
 //`http://localhost:4567/api/login?username=${username}&password=${password}`
 app.post('/login', (req, res) => {
     let username = req.body.username.trim();
@@ -209,6 +233,24 @@ app.post('/login', (req, res) => {
     });
 });
 
+//Log User outs______________________________________________________________
+app.get('/logout', (req, res) => {
+    //delet user token
+    res.cookie("token",{expires: Date.now()});
+    res.redirect("/login");
+});
+
+// route to view cookie data for debugging________________________________________
+app.get("/show_cookies", (req,res) => {
+	// any cookies sent with the request are available
+	//  in req.cookies
+	var show = "<h1>All Your Cookies</h1>\n<ul>\n";
+	for (const key in req.cookies) {
+		show += `<li>${key} = ${req.cookies[key]}</li>\n`;
+	}
+	show += "</ul>\n";
+	res.send(show);
+});
 
 var server = app.listen(app.get('port'), function() {
 	console.log("Server started...")

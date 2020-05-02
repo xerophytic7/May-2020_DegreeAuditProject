@@ -6,27 +6,29 @@
         <div class="col-md-8">
           <div class="card">
             <div class="card-header">
-              <h5 class="title">Edit Profile</h5>
+              <h5 class="title">User Profile
+              </h5>
             </div>
+            {{#MyInfo}}
             <div class="card-body">
               <form>
                 <div class="row">
                   <div class="col-md-5 pr-1">
                     <div class="form-group">
                       <label>Student ID (disabled)</label>
-                      <input type="text" class="form-control" disabled="" placeholder="SID" value="55555555">
+                      <input type="text" class="form-control" disabled="" placeholder="SID" value="{{ID}}">
                     </div>
                   </div>
                   <div class="col-md-3 px-1">
                     <div class="form-group">
-                      <label>Username</label>
-                      <input type="text" class="form-control" placeholder="Username" value="michael23">
+                      <label>Username </label>
+                      <input type="text" class="form-control" disabled="" placeholder="Username" value={{Email}}>
                     </div>
                   </div>
                   <div class="col-md-4 pl-1">
                     <div class="form-group">
                       <label for="exampleInputEmail1">Email address</label>
-                      <input type="email" class="form-control" placeholder="Email">
+                      <input type="email" class="form-control" placeholder={{Email}}>
                     </div>
                   </div>
                 </div>
@@ -34,13 +36,13 @@
                   <div class="col-md-6 pr-1">
                     <div class="form-group">
                       <label>First Name</label>
-                      <input type="text" class="form-control" placeholder="Company" value="Mike">
+                      <input type="text" class="form-control" placeholder="Company" value="{{FirstName}}">
                     </div>
                   </div>
                   <div class="col-md-6 pl-1">
                     <div class="form-group">
                       <label>Last Name</label>
-                      <input type="text" class="form-control" placeholder="Last Name" value="Andrew">
+                      <input type="text" class="form-control" placeholder="Last Name" value="{{LastName}}">
                     </div>
                   </div>
                 </div>
@@ -48,7 +50,7 @@
                   <div class="col-md-12">
                     <div class="form-group">
                       <label>Address</label>
-                      <input type="text" class="form-control" placeholder="Home Address" value="123 Anywhere Lane, Edinburg, TX 78539">
+                      <input type="text" class="form-control" placeholder="Home Address" value="{{address}}">
                     </div>
                   </div>
                 </div>
@@ -56,13 +58,13 @@
                   <div class="col-md-4 pr-1">
                     <div class="form-group">
                       <label>City</label>
-                      <input type="text" class="form-control" placeholder="City" value="Mike">
+                      <input type="text" class="form-control" placeholder="City" value="{{city}}">
                     </div>
                   </div>
                   <div class="col-md-4 px-1">
                     <div class="form-group">
                       <label>Country</label>
-                      <input type="text" class="form-control" placeholder="Country" value="Andrew">
+                      <input type="text" class="form-control" placeholder="Country" value="{{country}}">
                     </div>
                   </div>
                   <div class="col-md-4 pl-1">
@@ -76,7 +78,7 @@
                   <div class="col-md-12">
                     <div class="form-group">
                       <label>Clasification</label>
-                      <textarea rows="4" cols="80" class="form-control" placeholder="Here can be your Clasification" value="Mike">Senior Degree in Bachelor of Science Computer Science</textarea>
+                      <textarea rows="4" cols="80" class="form-control" placeholder="Here can be your Clasification" value="Mike">{{Classification}} Degree in Bachelor of Science Computer Science</textarea>
                     </div>
                   </div>
                 </div>
@@ -93,27 +95,27 @@
               <div class="author">
                 <a href="#">
                   <img class="avatar border-gray" src="images/user.png" alt="...">
-                  <h5 class="title">Mike Andrew</h5>
+                  <h5 class="title">{{FirstName}} {{LastName}}</h5>
                 </a>
                 <p class="description">
-                  michael24
+                  {{Email}}
                 </p>
               </div>
               <p class="description text-center">
-              GPA:	  3.34
+              GPA:	 {{GPA}}
               <br> 
-             Classification: Senior
+              Classification: {{Classification}}
               <br>
-                  	
-Catalog Year:	  2016-2017
-<br>
-  Credits Required:	  127
-  <br>
-
-	Credits Applied:	  151
+              Catalog Year:	  {{CatalogYear}}
+              <br>
+              Advanced Cs Hours:	  {{AdvancedCsHours}}
+              <br>
+              Advanced Hours:	  {{AdvancedHours}}
+              <br>
+              Credits Applied:	   {{Hours}}
               </p>
             </div>
-           
+            {{/MyInfo}}
           </div>
         </div>
       </div>
