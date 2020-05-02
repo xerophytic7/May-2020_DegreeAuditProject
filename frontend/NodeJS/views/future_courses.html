@@ -22,12 +22,13 @@
               <th class="text-right"> Credits  </th>
             </thead>
                 <tbody>
+                <form action="/add_courses" method="post">
                   {{#courses}}  
                   <tr>
                     <td>
                       <div class="form-check">
                         <label class="form-check-label">
-                          <input class="form-check-input" type="checkbox" checked>
+                          <input class="form-check-input" type="checkbox" name="courses" value={{CourseID}}>  
                           <span class="form-check-sign"></span>
                         </label>
                       </div>
@@ -47,7 +48,7 @@
                       <p class="text-center"></p><button type="submit" class="btn btn-fill btn-primary ">Submit</button></p>
                     </td>
                   </tr>
-                 
+                </form>
                 </tbody>
               </table>
             </div>
@@ -78,22 +79,32 @@
           <th class="text-right"> Credits  </th>
       </thead>
           <tbody>
+            {{#courses}}  
             <tr>
               <td>
                 <div class="form-check">
                   <label class="form-check-label">
-                    <input class="form-check-input" type="checkbox" checked>
+                    <input class="form-check-input" type="checkbox" >
                     <span class="form-check-sign"></span>
                   </label>
                 </div>
               </td>
-              <td class="text-left">CSCI 4325 </td>
-              <td class="text-left">Automata </td>
-              <td class="text-left">Fall 2020 </td>
-              <td class="text-right">3.00 </td>
+              <td class="text-left">  </td>
+              <td class="text-left">  </td>
+              <td class="text-left">  </td>
+              <td class="text-right"> </td>
               
             </tr>
-         
+            {{/courses}}
+            <tr>
+              <td class="text-left"></td>
+              <td class="text-left"></td>
+              <td class="text-left"></td>
+              <td class="text-left"></td>
+              <td class="text-right">
+               <button type="submit" class="btn btn-fill btn-primary ">Submit</button>
+              </td>
+            </tr>
           
           </tbody>
         </table>

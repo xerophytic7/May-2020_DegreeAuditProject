@@ -14,6 +14,8 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const axios = require('axios').default;//for jwt request to api
 var hbs = require( 'express-handlebars');
+//require('handlebars-form-helpers').register(hbs.handlebars);
+
 
 app = express();
 app.set('port', 3002);
@@ -46,12 +48,11 @@ const url = require('url');
 
 //get home page
 app.get('/home', (req, res) => {
-    console.log("home token: "+req.query.token);
 
     //get all the courses using token
     axios.get(`http://localhost:4567/all/Courses`, {
         headers:{
-            'Authorization': `bearer ${req.query.token}`
+            'Authorization': `bearer ${req.cookies["token"]}`
         }        
     }).then(function (response) {
         // handle success
@@ -62,23 +63,16 @@ app.get('/home', (req, res) => {
         res.render("home",{active: 
             { home: true },
             page: "Home",
-            token: req.query.token,
             courses: courses    
         });
 
       })
       .catch(function (error) {
-        // handle error
+        // return error to notify user
         console.log(error);
       })
 
 
-    // //render page with courses 
-    // res.render("home",{active: 
-    //     { home: true },
-    //     page: "Home",
-    //     token: req.query.token
-    // });
 });
 
 //get login page
@@ -94,8 +88,13 @@ app.get('/register', (req, res) => {
 
 //get advising page
 app.get('/advising', (req, res) => {
-    res.render("advising",{active: { advising: true },page: "Advising"});
+    res.render("advising",{active: 
+        { advising: true },
+        page: "Advising"
+    });
 });
+
+
 
 //get future_courses page
 app.get('/future_courses', (req, res) => {
@@ -109,7 +108,6 @@ app.get('/future_courses', (req, res) => {
         // handle success
         console.log("courses: "+JSON.stringify(response["data"]));
         let courses = response["data"];
-        console.log("courses variable: "+courses);
         //render page with courses 
         res.render("future_courses",{active: 
             { future_courses: true },
@@ -123,10 +121,6 @@ app.get('/future_courses', (req, res) => {
         console.log(error);
       })
 
-
-
-   
-    // res.render("future_courses",{active: { future_courses: true },page: "Future Courses"});
 });
 
 //get notifications page
@@ -138,6 +132,34 @@ app.get('/notifications', (req, res) => {
 app.get('/user_profile', (req, res) => {
     res.render("user_profile",{active: { user_profile: true },page: "User Profile"});
 });
+
+
+//add courses that users plan to take in the next semester (veryfied by advisor)
+//http://localhost:4567/update/Student_Courses/
+//req.body.courses contains the course id to be added
+app.post('/add_courses', (req, res) => {
+    console.log("add_courses: "+req.body.courses);
+    //use axios to add courses in api
+    for (i = 0; i < req.body.courses.length; i++) {
+        axios.post(`http://localhost:4567/update/Student_Courses?CourseID=${req.body.courses[i]}`, {
+            headers:{
+                'Authorization': `bearer ${req.cookies["token"]}`
+            }        
+        }
+         ).then(function (response) {
+            console.log(response);
+            //if succsesful
+            res.redirect("/future_courses");
+        })
+        .catch(function (error) {
+            console.log(error+" error adding course");
+            //if succsesful
+            res.redirect("/future_courses");
+        });
+    }
+ });
+ 
+ 
 
 //register a new user with the api
 // http://localhost:4567/api/register
@@ -178,22 +200,13 @@ app.post('/login', (req, res) => {
         console.log("login token: "+token);
        //store token in cookie
        res.cookie("token", token);
-        //redirect user to home page with token
-        res.redirect(url.format({
-            pathname:"/home",
-            query: {
-               "token": token,
-             }
-          }));
+       res.redirect("/home");
     })
     .catch(function (error) {
         console.log(error);
-        
-         //if succsesful
-       // res.redirect("/login");
+         //if unsuccsesful
+        res.redirect("/login");
     });
-
-  // res.redirect("/home");
 });
 
 
