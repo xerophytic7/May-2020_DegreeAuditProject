@@ -3,7 +3,7 @@
       <div class="panel-header panel-header-sm">
       </div>
       <div class="content">
-      <!------ CS Course Selection------>
+      <!------ CS Course Selection------------------------------------------------------->
       <div class="row">
       <div class="col-md-12"">
         <div class="card ">
@@ -57,19 +57,19 @@
         </div>
       </div>
     </div>
-<!---end CS core-->
+<!---end CS core---------------------------------------------------------------->
 
 
-<!------math Course Selection------>
+<!------science Course Selection------------------------------------------------->
 <div class="row">
-<div class="col-md-12">
-  <div class="card ">
-    <div class="card-header ">
-    <h5 class="card-category">Select you courses – 3 hours</h5>
-    <h4 class="card-title">Math core classes</h4>
-    </div>
-    <div class="card-body ">
-      <div class="table-full-width table-responsive">
+  <div class="col-md-12"">
+    <div class="card ">
+      <div class="card-header ">
+      <h5 class="card-category">Life and Physical Science – 6 hours</h5>
+      <h4 class="card-title">Science  </h4>
+      </div>
+      <div class="card-body ">
+        <div class="table-full-width table-responsive">
         <table class="table">
         <thead class=" text-primary">
           <th> Selected </th>
@@ -77,41 +77,99 @@
           <th> Description</th>
           <th> Semester Date</th>
           <th class="text-right"> Credits  </th>
-      </thead>
-          <tbody>
-            {{#courses}}  
-            <tr>
-              <td>
-                <div class="form-check">
-                  <label class="form-check-label">
-                    <input class="form-check-input" type="checkbox" >
-                    <span class="form-check-sign"></span>
-                  </label>
-                </div>
-              </td>
-              <td class="text-left">  </td>
-              <td class="text-left">  </td>
-              <td class="text-left">  </td>
-              <td class="text-right"> </td>
-              
-            </tr>
-            {{/courses}}
-            <tr>
-              <td class="text-left"></td>
-              <td class="text-left"></td>
-              <td class="text-left"></td>
-              <td class="text-left"></td>
-              <td class="text-right">
-               <button type="submit" class="btn btn-fill btn-primary ">Submit</button>
-              </td>
-            </tr>
-          
-          </tbody>
-        </table>
+        </thead>
+            <tbody>
+            <form action="/add_courses" method="post">
+              {{#courses}}  
+              <tr>
+                <td>
+                  <div class="form-check">
+                    <label class="form-check-label">
+                      <input class="form-check-input" type="checkbox" name="courses" value={{CourseID}}>  
+                      <span class="form-check-sign"></span>
+                    </label>
+                  </div>
+                </td>
+                <td class="text-left"></td>
+                <td class="text-left"></td>
+                <td class="text-left"></td>
+                <td class="text-right"></td>
+              </tr>
+              {{/courses}}
+              <tr>
+                <td class="text-left"></td>
+                <td class="text-left"></td>
+                <td class="text-left"></td>
+                <td class="text-left"></td>
+                <td class="text-right">
+                  <p class="text-center"></p><button type="submit" class="btn btn-fill btn-primary ">Submit</button></p>
+                </td>
+              </tr>
+            </form>
+            </tbody>
+          </table>
+        </div>
       </div>
+     
     </div>
-   
   </div>
 </div>
+<!---end science core---------------------------------------------->
+
+
+<!------Language, Philosophy-------------------------------->
+<div class="row">
+  <div class="col-md-12"">
+    <div class="card ">
+      <div class="card-header ">
+      <h5 class="card-category">Language, Philosophy, and Culture – 3 hours</h5>
+      <h4 class="card-title">Philosophy  </h4>
+      </div>
+      <div class="card-body ">
+        <div class="table-full-width table-responsive">
+        <table class="table">
+        <thead class=" text-primary">
+          <th> Selected </th>
+          <th> Course Title</th>
+          <th> Description</th>
+          <th> Semester Date</th>
+          <th class="text-right"> Credits  </th>
+        </thead>
+            <tbody>
+            <form action="/add_courses" method="post">
+              {{#courses}}  
+              <tr>
+                <td>
+                  <div class="form-check">
+                    <label class="form-check-label">
+                      <input class="form-check-input" type="checkbox" name="courses" value={{CourseID}}>  
+                      <span class="form-check-sign"></span>
+                    </label>
+                  </div>
+                </td>
+                <td class="text-left"></td>
+                <td class="text-left"></td>
+                <td class="text-left"></td>
+                <td class="text-right"></td>
+              </tr>
+              {{/courses}}
+              <tr>
+                <td class="text-left"></td>
+                <td class="text-left"></td>
+                <td class="text-left"></td>
+                <td class="text-left"></td>
+                <td class="text-right">
+                  <p class="text-center"></p><button type="submit" class="btn btn-fill btn-primary ">Submit</button></p>
+                </td>
+              </tr>
+            </form>
+            </tbody>
+          </table>
+        </div>
+      </div>
+     
+    </div>
+  </div>
 </div>
-<!---end MATH core-->
+<!---end Language, Philosophy, and Culture-------------------------------------------------------->
+

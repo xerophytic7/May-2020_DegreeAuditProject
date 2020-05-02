@@ -78,12 +78,12 @@ app.get('/home', (req, res) => {
 //get login page
 app.get('/login', (req, res) => {
     //hide main.html content by sending false
-    res.render("login", {show: null});
+    res.render("login", {layout: false});
 });
 
 //get register page
 app.get('/register', (req, res) => {
-    res.render("register");
+    res.render("register",{layout: false});
 });
 
 //get advising page
