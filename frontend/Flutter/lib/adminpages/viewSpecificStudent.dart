@@ -22,7 +22,7 @@ class SizeConfig {
     blockSizeHorizontal = screenWidth / 100;
     blockSizeVertical = screenHeight / 100;
   }
-  
+
   // Example
   // Widget build(BuildContext context) {
   //   SizeConfig().init(context);
@@ -117,27 +117,48 @@ class Student {
       this.advancedhours);
 }
 
-class DegreePageMimic extends StatefulWidget {
-  //DegreePageMimic({Key key, this.title}) : super(key: key);
+Future<Student> _getUser() async {
+  var response = await http.get(
+      "$address/user?StudentID=?${await storage.read(key: "studentId")}}",
+      headers: {
+        HttpHeaders.authorizationHeader:
+            "Bearer ${await storage.read(key: "token")}"
+      });
+
+  if (response.statusCode != 200) return null;
+
+  var data = json.decode(response.body);
+
+  print("return the JSON of info ==> $data");
+
+  Student student = Student(
+      data["FirstName"],
+      data["LastName"],
+      data["Email"],
+      data["GPA"],
+      data["CatalogYear"],
+      data["Classification"],
+      data["Hours"],
+      data["AdvancedCsHours"],
+      data["AdvancedHours"]);
+
+  return student;
+}
+
+class SpecificStudent extends StatefulWidget {
+  //SpecificStudent({Key key, this.title}) : super(key: key);
 
   //final String title;
 
   @override
-  _DegreePageMimicState createState() => new _DegreePageMimicState();
+  _SpecificStudentState createState() => new _SpecificStudentState();
 }
 
-class _DegreePageMimicState extends State<DegreePageMimic> {
-  int statusCode = 0;
-
+class _SpecificStudentState extends State<SpecificStudent> {
   @override
   Widget build(BuildContext context) {
-    //StudentInfo();
-    // Future<Map<String, dynamic>> data = CoursesInfo();
-
-    // print(data);
-    //need a future builder
     return new FutureBuilder(
-      future: _getCourses(),
+      future: _getUser(),
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         if (snapshot.data == null) {
           print("snapshot is null :O");
@@ -164,82 +185,3 @@ class _DegreePageMimicState extends State<DegreePageMimic> {
     );
   }
 }
-
-class PopUpAdd extends StatefulWidget {
-  @override
-  final String message;
-  const PopUpAdd({Key key, this.message}) : super(key: key);
-
-  State<StatefulWidget> createState() => PopUpAddState();
-}
-
-class PopUpAddState extends State<PopUpAdd>
-    with SingleTickerProviderStateMixin {
-  AnimationController controller;
-  Animation<double> scaleAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-
-    controller =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 450));
-    scaleAnimation =
-        CurvedAnimation(parent: controller, curve: Curves.elasticInOut);
-
-    controller.addListener(() {
-      setState(() {});
-    });
-
-    controller.forward();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Material(
-        color: Colors.transparent,
-        child: ScaleTransition(
-          scale: scaleAnimation,
-          child: Container(
-            decoration: ShapeDecoration(
-                color: Colors.white,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15.0))),
-            child: Padding(
-              padding: const EdgeInsets.all(50.0),
-              child: Text(widget.message),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// (() {
-//   // your code here
-// }()),
-
-// ListView.builder(
-//               itemCount: snapshot.data.length,
-//               itemBuilder: (BuildContext context, int i) {
-//                 return ListTile(
-//                   title: Text(snapshot.data[i].name,
-//                       style: TextStyle(color: Color(0xffebebe8))),
-//                   subtitle: Text(
-//                       "${snapshot.data[i].courseDept} ${snapshot.data[i].courseNum}"),
-//                   onTap: () => showDialog(
-//                     context: context,
-//                     builder: (_) => PopUpAdd(message: "Implement Later"),
-//                   ),
-//                   trailing: Text("+"),
-//                   leading: Text((() {
-//                     if (snapshot.data[i].taken == true) {
-//                       return "✔️";
-//                     }else
-//                     return "❌";
-//                   })()),
-//                 );
-//               },
-//             ),
