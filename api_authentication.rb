@@ -9,7 +9,7 @@ require File.expand_path("../models/CoursePreREQ.rb", __FILE__)
 require File.expand_path("../models/PlannedFutureCourses.rb", __FILE__)
 require File.expand_path("../models/StudentCourses.rb", __FILE__)
 
-SECRET_KEY = "laUU^%D&IYTV5&^f8^%D7iF865D&687686eIVjflk"
+SECRET_KEY = "laUU^%D&IYTV5&^f8^%D7iF865D&68JHibuh876FVi7%T^6754f769g98y678fF657686eIVjflk"
 
 def api_authenticate!
 	@api = true

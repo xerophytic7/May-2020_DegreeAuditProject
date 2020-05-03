@@ -10,6 +10,8 @@ require File.expand_path("../models/CourseCategories.rb", __FILE__)
 require File.expand_path("../models/CoursePreREQ.rb", __FILE__)
 require File.expand_path("../models/PlannedFutureCourses.rb", __FILE__)
 require File.expand_path("../models/StudentCourses.rb", __FILE__)
+require File.expand_path("../models/AdvisementSession.rb", __FILE__)
+require File.expand_path("../models/CatalogYears.rb", __FILE__)
 
 #require_relative 'models/User.rb'
 #require_relative 'models/Categories.rb'
@@ -35,6 +37,9 @@ CoursePreREQ.auto_upgrade!
 StudentCourses.auto_upgrade!
 AllCourses.auto_upgrade!
 Categories.auto_upgrade!
+AdvisementSession.auto_upgrade!
+CatalogYears.auto_upgrade!
+
 
 =begin
 #If there is no admin account, make one.
@@ -54,7 +59,7 @@ post '/createAdmin' do
   halt 422, {"message": "Admin account already exists"}.to_json
   end
 end
-
+=begin
 
 # TEST # Create user with custom serial id
 post '/customid' do
@@ -184,24 +189,24 @@ end
     if !current_user.admin
       halt 401, {"message": "Unauthorized user"}.to_json
     end
-    params["CourseDept"] ? (CourseDept = params["CourseDept"]) : (halt 400, {"message": "Missing Paramaters"}.to_json)
+    params["CourseDept"] ? (courseDept = params["CourseDept"]) : (halt 400, {"message": "Missing Paramaters"}.to_json)
     params["CourseNum"] ? (CourseNum = params["CourseNum"]) : (halt 400, {"message": "Missing Paramaters"}.to_json)
     params["Name"] ? (name = params["Name"]) : (halt 400, {"message": "Missing Paramaters"}.to_json)
-    params["Institution"] ? (Institution = params["Institution"]) : (halt 400, {"message": "Missing Paramaters"}.to_json)
+    params["Institution"] ? (institution = params["Institution"]) : (halt 400, {"message": "Missing Paramaters"}.to_json)
 
     #*********** DUPLICATE CHECK ***************
-    halt 409, {'message': 'Duplicate Entry'}.to_json if AllCourses.first(CourseDept: CourseDept, 
-      CourseNum: CourseNum, Name: name, Institution: Institution)
+    halt 409, {'message': 'Duplicate Entry'}.to_json if AllCourses.first(CourseDept: courseDept, 
+      CourseNum: CourseNum, Name: name, Institution: institution)
 
     if !is_number?(CourseNum)
       halt 400, {'message': 'Course Number must be an integer'}.to_json
     end
-    if CourseDept != '' && CourseNum != '' && name != '' && Institution != ''
+    if courseDept != '' && CourseNum != '' && name != '' && institution != ''
       c = AllCourses.new
-      c.CourseDept = CourseDept
+      c.CourseDept = courseDept.upcase
       c.CourseNum = CourseNum
-      c.Name = name
-      c.Institution = Institution
+      c.Name = name.titleize
+      c.Institution = institution.titleize
       c.save
 
       halt 200, {"message": "Successfully added course to AllCourses Table"}.to_json
@@ -247,8 +252,8 @@ end
           c = StudentCourses.new
           userid != '' ? (c.UserID = userid) : (halt 400, {"message": "Missing UserID paramater"}.to_json)
           c.CourseID = courseid
-          c.Semester = semester
-          c.Grade = grade
+          c.Semester = semester.titleize
+          c.Grade = grade.upcase
           if notes != nil
             c.Notes = notes 
           end
@@ -268,8 +273,8 @@ end
         c = StudentCourses.new
         c.UserID = current_user.id
         c.CourseID = courseid
-        c.Semester = semester
-        c.Grade = grade
+        c.Semester = semester.titleize
+        c.Grade = grade.upcase
         if notes != nil
           c.Notes = notes
         end
@@ -282,7 +287,7 @@ end
   end
   
   # Create entries to PlannedFutureCourses given JSON list of courses, 
-  # list of courses should have CourseID and Semester. 
+  # list of courses should have AdvisementID, CourseID and Semester. 
   post '/add/PlannedCourses' do
     api_authenticate!
     params.each do |i|
@@ -291,12 +296,17 @@ end
     plannedCourses = params[:Courses]
     x = 1
     plannedCourses.each do |i|
-      if !i[1]["courseID"] || !i[1]["semester"]
+      if !i[1]["courseID"] || !i[1]["semester"] || !i[1]['advisementID']
         halt 400, {"message": "Missing paramaters, or possible typo"}.to_json
       end
       if !AllCourses.get(i[1]["courseID"])
         halt 404, {'message': "Course number #{x} on your list was not found, no courses were added to planned courses"}.to_json
       end
+      if !AdvisementSession.get(i[i]['advisementID'])
+        aID = i[1]['advisementID']
+        halt 404, {'message': "AdvisementID: #{aID} (number #{x} on your list) was not found in AdvisementSession table."}.to_json
+      end
+
       # DUPLICATE ENTRY CHECK
       if PlannedFutureCourses.first(UserID: current_user.id, CourseID: i[1]["courseID"], Semester: i[1]["semester"])
         halt 409, {'message': 'Duplicate Entry'}.to_json
@@ -316,9 +326,10 @@ end
     plannedCourses.each do |i|
       #puts i[1]["courseID"]    #puts i[1]["semester"]
       p = PlannedFutureCourses.new
+      p.AdvisementID = i[1]['advisementID']
       p.UserID = current_user.id
       p.CourseID = i[1]["courseID"]
-      p.Semester = i[1]["semester"]
+      p.Semester = i[1]["semester"].titleize
       p.save
     end
       halt 201, {"message": "Courses added to Planned courses successfully"}.to_json
@@ -340,12 +351,17 @@ end
         halt 400, {"message": "ReqHours and AdvHours paramaters have to be integers"}.to_json
       end
       
-      if maincat != '' && catnum != '' && catname != '' && reqhrs !='' && catyr != '' && advhrs != ''
+      if maincat != '' && catnum != '' && catname != '' && reqhrs !='' && catyr != '' && advhrs != '' 
+        if !CatalogYears.first(CatalogYear: catyr.titleize)
+          yr = CatalogYear.new
+          yr.CatalogYear = catyr.titleize
+          yr.save
+        end
         category = Categories.new
-        category.MainCategory = maincat
+        category.MainCategory = maincat.titleize
         category.CategoryNum = catnum
-        category.CategoryName = catname
-        category.CatalogYear = catyr
+        category.CategoryName = catname.titleize
+        category.CatalogYear = catyr.titleize
         category.ReqHours = reqhrs
         category.AdvHours = advhrs
         category.save
@@ -426,9 +442,14 @@ end
     end
   end
   
-  # Create Course alternatives Given a CourseID and AltID
-  # **************************IGNORE FOR NOW, AS PER FIGUEROA******************************
+
   
+  # Create Course alternatives Given a CourseID and AltID
+  # ***************************************************************************************
+  # **************************IGNORE FOR NOW, AS PER FIGUEROA******************************
+  # ***************************************************************************************
+
+
   
   # Takes in json list of all categories for a catalog year. Creates new degree plan 
   # (Mainly add to Categories Table: MainCategory, CategoryNum, CategoryName, CatalogYear, ReqHours and AdvHours. 
@@ -460,11 +481,17 @@ end
         
       end
       cats.each do |i|
+
+        if !CatalogYears.first(CatalogYear: i[1]['CatalogYear'].titleize)
+          yr = CatalogYear.new
+          yr.CatalogYear = i[1]['CatalogYear'].titleize
+          yr.save
+        end
         c = Categories.new
-        c.MainCategory = i[1]['MainCategory']
+        c.MainCategory = i[1]['MainCategory'].titleize
         c.CategoryNum = i[1]['CategoryNum']
-        c.CategoryName = i[1]['CategoryName']
-        c.CatalogYear = i[1]['CatalogYear']
+        c.CategoryName = i[1]['CategoryName'].titleize
+        c.CatalogYear = i[1]['CatalogYear'].titleize
         c.ReqHours = i[1]['ReqHours']
         c.AdvHours =i[1]['AdvHours']
         c.save
@@ -476,10 +503,6 @@ end
       halt 401, {"message": "Unauthorized user"}.to_json
     end
   end
-
-
-  # Matching json List of CourseIDs to a CatagoryID
-  # with a CourseID and adding that to CourseCategories table.)
   
   
   ############## READ ##################
@@ -527,7 +550,7 @@ end
           list = [u.id, u.FirstName, u.LastName, u.Email,
             u.GPA, u.CatalogYear, u.Classification,
           u.Hours, u.AdvancedHours, u.Advanced_CS_Hours, uc, pfc]
-
+        
           return list.to_json
         else
           halt 400, {'message': 'User not found'}.to_json
