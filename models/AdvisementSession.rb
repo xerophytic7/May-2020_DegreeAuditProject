@@ -1,7 +1,5 @@
 require 'data_mapper'
 
-
-
 class AdvisementSession
   include DataMapper::Resource
 
@@ -9,6 +7,6 @@ class AdvisementSession
   property :AdminID, Integer, :key=> true
   property :StudentID, Integer, :key=> true
   property :Date, Date
-  property :Notes, String
+  property :Notes, Text
 
 end 
