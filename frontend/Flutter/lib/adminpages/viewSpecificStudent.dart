@@ -98,12 +98,12 @@ class Student {
   final String firstname;
   final String lastname;
   final String email;
-  final String gpa;
+  final double gpa;
   final String catalogyear;
   final String classification;
-  final String hours;
-  final String advancedhours;
-  final String advancedcshours;
+  final int hours;
+  final int advancedhours;
+  final int advancedcshours;
 
   Student(
       this.firstname,
@@ -118,12 +118,13 @@ class Student {
 }
 
 Future<Student> _getUser() async {
-  var response = await http.get(
-      "$address/user?StudentID=?${await storage.read(key: "studentId")}}",
-      headers: {
-        HttpHeaders.authorizationHeader:
-            "Bearer ${await storage.read(key: "token")}"
-      });
+  String studentId;
+  studentId = await storage.read(key: "studentId");
+  print("This is the _getUser link $address/UserInfo?Email=?$studentId");
+  var response = await http.get("$address/userInfo?Email=$studentId", headers: {
+    HttpHeaders.authorizationHeader:
+        "Bearer ${await storage.read(key: "token")}"
+  });
 
   if (response.statusCode != 200) return null;
 
@@ -157,31 +158,145 @@ class SpecificStudent extends StatefulWidget {
 class _SpecificStudentState extends State<SpecificStudent> {
   @override
   Widget build(BuildContext context) {
-    return new FutureBuilder(
-      future: _getUser(),
-      builder: (BuildContext context, AsyncSnapshot snapshot) {
-        if (snapshot.data == null) {
-          print("snapshot is null :O");
-          return new Scaffold(
-            backgroundColor: Color(0xff65646a),
-            body: new Center(
-              child: new Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  Image.asset("assets/images/image0.png"),
-                ],
-              ),
-            ),
-          );
-        } else {
-          print("snapshot is not null");
-          return Scaffold(
-            backgroundColor: Color(0xff65646a),
-            body: Text("hi"),
-          );
-        }
-      },
-    );
+    SizeConfig().init(context);
+    double deviceWidth = SizeConfig.blockSizeHorizontal;
+    double deviceHeight = SizeConfig.blockSizeVertical;
+    return Column(children: [
+      Container(
+        //The First container for STUDENT INFORMATION!
+        decoration: BoxDecoration(color: Color(0xff65646a)),
+        child: FutureBuilder(
+          future: _getUser(),
+          builder: (BuildContext context, AsyncSnapshot snapshot) {
+            if (snapshot.data == null) {
+              print("snapshot is null :O");
+              return new Scaffold(
+                backgroundColor: Color(0xff65646a),
+                body: new Center(
+                  child: new Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      Image.asset("assets/images/image0.png"),
+                    ],
+                  ),
+                ),
+              );
+            } else {
+              print("snapshot is not null");
+              return Container(
+                width: deviceWidth * 100,
+                height: deviceHeight * 40,
+                child: Row(
+                  children: <Widget>[
+                    Container(
+                      margin: EdgeInsets.fromLTRB(deviceWidth * 1,
+                          deviceHeight * 4, deviceWidth * 1, deviceHeight * 1),
+                      //color: Color(0xffebebe8),
+                      width: deviceWidth * 98,
+                      height: deviceHeight * 35,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                            colors: [Color(0xffebebe8), Color(0xffebebe8)]),
+                        borderRadius: BorderRadius.circular(6.0),
+                      ),
+                      child: (Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: <Widget>[
+                            RichText(
+                              text: TextSpan(
+                                style: TextStyle(
+                                    color: Color(0xffcf4411),
+                                    fontWeight: FontWeight.bold,
+                                    height: deviceHeight * 0.2,
+                                    fontSize: deviceHeight * 2.28),
+                                children: <TextSpan>[
+                                  TextSpan(
+                                    text: 'Student Name: ',
+                                    style: TextStyle(
+                                        color: Colors.black.withOpacity(0.5)),
+                                  ),
+                                  TextSpan(
+                                    text:
+                                        '${snapshot.data.firstname} ${snapshot.data.lastname}\n',
+                                    style: TextStyle(
+                                        color: Colors.black.withOpacity(1.0)),
+                                  ),
+                                  TextSpan(
+                                    text: 'GPA: ',
+                                    style: TextStyle(
+                                        color: Colors.black.withOpacity(0.5)),
+                                  ),
+                                  TextSpan(
+                                    text: '${snapshot.data.gpa}\n',
+                                    style: TextStyle(
+                                        color: Colors.black.withOpacity(1.0)),
+                                  ),
+                                  TextSpan(
+                                    text: '\nCatalog Year: ',
+                                    style: TextStyle(
+                                        color: Colors.black.withOpacity(0.5)),
+                                  ),
+                                  TextSpan(
+                                    text: '${snapshot.data.catalogyear}\n',
+                                    style: TextStyle(
+                                        color: Colors.black.withOpacity(1.0)),
+                                  ),
+                                  TextSpan(
+                                    text: 'Classification: ',
+                                    style: TextStyle(
+                                        color: Colors.black.withOpacity(0.5)),
+                                  ),
+                                  TextSpan(
+                                    text: '${snapshot.data.classification}\n',
+                                    style: TextStyle(
+                                        color: Colors.black.withOpacity(1.0)),
+                                  ),
+                                  TextSpan(
+                                    text: '\nTotal Hours:               ',
+                                    style: TextStyle(
+                                        color: Colors.black.withOpacity(0.5)),
+                                  ),
+                                  TextSpan(
+                                    text: '${snapshot.data.hours}\n',
+                                    style: TextStyle(
+                                        color: Colors.black.withOpacity(1.0)),
+                                  ),
+                                  TextSpan(
+                                    text: 'Advanced Hours:      ',
+                                    style: TextStyle(
+                                        color: Colors.black.withOpacity(0.5)),
+                                  ),
+                                  TextSpan(
+                                    text: '${snapshot.data.advancedhours}\n',
+                                    style: TextStyle(
+                                        color: Colors.black.withOpacity(1.0)),
+                                  ),
+                                  TextSpan(
+                                    text: 'Advanced cs Hours  ',
+                                    style: TextStyle(
+                                        color: Colors.black.withOpacity(0.5)),
+                                  ),
+                                  TextSpan(
+                                    text: '${snapshot.data.advancedcshours}\n',
+                                    style: TextStyle(
+                                        color: Colors.black.withOpacity(1.0)),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            ///Here
+                          ])),
+                    ),
+                  ],
+                ),
+              );
+            }
+          },
+        ),
+      ),
+    ]);
   }
 }

@@ -71,7 +71,7 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
                   child: new TextFormField(
                     decoration: new InputDecoration(
                       //labelText: "Enter Username",
-                      hintText: "Student's Email",
+                      hintText: "Student's Email",  
                       fillColor: Colors.white,
                       border: new OutlineInputBorder(
                         borderRadius: new BorderRadius.circular(1),
@@ -100,9 +100,13 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
                         //icon: Icons.call_made,
                         //iconColor: Color(0xffcf4411),
                         onPressed: () async {
-                          String studentId;
+                          print("ABCC");
+                          
                           await storage.write(
-                              key: studentId, value: studentIdTextCtrl.text);
+                              key: "studentId", value: studentIdTextCtrl.text);
+                          
+                          print("This is the STudentID controller ${studentIdTextCtrl.text}, \n This is what is being stored on the device ${await storage.read(key: "studentId")}");
+                          
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -149,164 +153,6 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
                     color: Colors.black.withOpacity(.3),
                     offset: Offset(0.0, 8.0),
                     blurRadius: 8.0)
-              ]),
-              child: ListView(children: [
-                Padding(
-                  padding: EdgeInsets.all(0),
-                  child: new TextFormField(
-                    decoration: new InputDecoration(
-                      //labelText: "Enter Username",
-                      hintText: "StudentID",
-                      fillColor: Colors.white,
-                      border: new OutlineInputBorder(
-                        borderRadius: new BorderRadius.circular(1),
-                        borderSide: new BorderSide(),
-                      ),
-                      //fillColor: Colors.green
-                    ),
-                    style: new TextStyle(
-                      fontFamily: "Poppins",
-                    ),
-                    controller: studentIdTextCtrl,
-                  ),
-                ),
-                Row(
-                  children: <Widget>[
-                    Padding(
-                      padding: EdgeInsets.fromLTRB(deviceHeight * 5,
-                          deviceHeight * 4, deviceWidth * 1, deviceHeight * 1),
-                      child: NiceButton(
-                        background: Color(0xffebebe8),
-                        text: "Student's \nInfo",
-                        textColor: Color(0xffcf4411),
-                        fontSize: deviceWidth * 5,
-                        width: deviceWidth * 30,
-                        elevation: deviceHeight * 1,
-                        //icon: Icons.call_made,
-                        //iconColor: Color(0xffcf4411),
-                        onPressed: () async {
-                          String studentId;
-                          await storage.write(
-                              key: studentId, value: studentIdTextCtrl.text);
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => SpecificStudent()),
-                          );
-                        },
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.fromLTRB(deviceHeight * 1,
-                          deviceHeight * 4, deviceWidth * 4, deviceHeight * 1),
-                      child: NiceButton(
-                        background: Color(0xffebebe8),
-                        text: "Planned\n Courses",
-                        textColor: Color(0xffcf4411),
-                        fontSize: deviceWidth * 5,
-                        width: deviceWidth * 30,
-                        elevation: deviceHeight * 1,
-                        //icon: Icons.call_made,
-                        //iconColor: Color(0xffcf4411),
-                        onPressed: () async {
-                          String studentId;
-                          await storage.write(
-                              key: studentId, value: studentIdTextCtrl.text);
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => SpecificStudent()),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                )
-              ]),
-            ),
-            Container(
-              margin: EdgeInsets.fromLTRB(deviceWidth * 1, deviceHeight * 1,
-                  deviceWidth * 1, deviceHeight * 1),
-              width: deviceHeight * 100,
-              height: deviceHeight * 30,
-              decoration: BoxDecoration(color: Color(0xffebebe8), boxShadow: [
-                BoxShadow(
-                    color: Colors.black.withOpacity(.3),
-                    offset: Offset(0.0, 8.0),
-                    blurRadius: 8.0)
-              ]),
-              child: ListView(children: [
-                Padding(
-                  padding: EdgeInsets.all(0),
-                  child: new TextFormField(
-                    decoration: new InputDecoration(
-                      //labelText: "Enter Username",
-                      hintText: "StudentID",
-                      fillColor: Colors.white,
-                      border: new OutlineInputBorder(
-                        borderRadius: new BorderRadius.circular(1),
-                        borderSide: new BorderSide(),
-                      ),
-                      //fillColor: Colors.green
-                    ),
-                    style: new TextStyle(
-                      fontFamily: "Poppins",
-                    ),
-                    controller: studentIdTextCtrl,
-                  ),
-                ),
-                Row(
-                  children: <Widget>[
-                    Padding(
-                      padding: EdgeInsets.fromLTRB(deviceHeight * 5,
-                          deviceHeight * 4, deviceWidth * 1, deviceHeight * 1),
-                      child: NiceButton(
-                        background: Color(0xffebebe8),
-                        text: "Student's \nInfo",
-                        textColor: Color(0xffcf4411),
-                        fontSize: deviceWidth * 5,
-                        width: deviceWidth * 30,
-                        elevation: deviceHeight * 1,
-                        //icon: Icons.call_made,
-                        //iconColor: Color(0xffcf4411),
-                        onPressed: () async {
-                          String studentId;
-                          await storage.write(
-                              key: studentId, value: studentIdTextCtrl.text);
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => SpecificStudent()),
-                          );
-                        },
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.fromLTRB(deviceHeight * 1,
-                          deviceHeight * 4, deviceWidth * 4, deviceHeight * 1),
-                      child: NiceButton(
-                        background: Color(0xffebebe8),
-                        text: "Planned\n Courses",
-                        textColor: Color(0xffcf4411),
-                        fontSize: deviceWidth * 5,
-                        width: deviceWidth * 30,
-                        elevation: deviceHeight * 1,
-                        //icon: Icons.call_made,
-                        //iconColor: Color(0xffcf4411),
-                        onPressed: () async {
-                          String studentId;
-                          await storage.write(
-                              key: studentId, value: studentIdTextCtrl.text);
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => SpecificStudent()),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                )
               ]),
             )
           ],

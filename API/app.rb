@@ -1049,3 +1049,89 @@ get '/isAdmin' do
 
 end
 ####
+
+#GEt User INformation
+  get '/userInfo' do
+    api_authenticate!
+
+    if current_user.admin
+      email = params['Email'].downcase if params['Email']
+      userid = params['StudentID'] if params['StudentID']
+
+      if userid
+
+        u = User.first(userid)
+        uc = StudentCourses.all(UserID: userid)
+        pfc = PlannedFutureCourses.all(UserID: userid)
+        if u
+          halt 200,{
+            'FirstName'       => u.FirstName,
+            'LastName'        => u.LastName,
+            'Email'           => u.Email,
+            'GPA'             => u.GPA,
+            'CatalogYear'     => u.CatalogYear,
+            'Classification'  => u.Classification,
+            'Hours'           => u.Hours,
+            'AdvancedCsHours' => u.Advanced_CS_Hours,
+            'AdvancedHours'   => u.AdvancedHours
+          }.to_json
+
+          return list.to_json
+        else
+          halt 400, {'message': 'User not found'}.to_json
+        end
+      elsif email
+        puts "Got to email"
+        u = User.first(Email: email)
+        uc = StudentCourses.all(UserID: u.id)
+        pfc = PlannedFutureCourses.all(UserID: u.id)
+        
+        if u
+          halt 200,{
+            'FirstName'       => u.FirstName,
+            'LastName'        => u.LastName,
+            'Email'           => u.Email,
+            'GPA'             => u.GPA,
+            'CatalogYear'     => u.CatalogYear,
+            'Classification'  => u.Classification,
+            'Hours'           => u.Hours,
+            'AdvancedCsHours' => u.Advanced_CS_Hours,
+            'AdvancedHours'   => u.AdvancedHours
+          }.to_json
+
+         # return list.to_json
+        else
+          halt 400, {'message': 'User not found'}.to_json
+        end
+      else
+        halt 400, {'message': 'Missing paramaters'}.to_json
+      end
+
+    else
+      halt 401, {"message": "Unauthorized user"}.to_json
+    end
+  end
+
+  get '/usersPlannedCoursesW/oSemester' do
+    api_authenticate!
+    email = params['Email'] if params['Email']
+    userid = params['StudentID'] if params['StudentID']
+    #params['semester'] ? (semester = params['semester']) : (halt 400, {'message': 'Missing paramaters'}.to_json)
+
+    if userid
+      u = PlannedFutureCourses.all(UserID: userid) 
+      u ? (halt 200, u.to_json) : (halt 400, {'message': 'User has no planned courses for selected semester'}.to_json)
+
+    elsif email
+      u = User.first(Email: email)
+      if u
+        list = PlannedFutureCourses.all(UserID: u.id)
+        list ? (halt 200, list.to_json) : (halt 400, {'message': 'User has no planned courses for selected semester'}.to_json)
+      
+      else
+        halt 400, {'message': 'User not found'}.to_json
+      end
+    else
+      halt 400, {'message': 'Missing paramaters'}.to_json
+    end
+  end
