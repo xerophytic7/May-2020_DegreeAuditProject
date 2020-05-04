@@ -1033,21 +1033,23 @@ end
 
  ###MMARIO######
  get '/isAdmin' do
-  api_authenticate!  
-  halt 200, {"admin" => "#{current_user.admin}",
-              "mode" => "#{current_user.mode}"}.to_json
+  api_authenticate!
+  halt 200, {"message" => "true"}.to_json if current_user.admin
+  halt 401, {"message" => "false"}.to_json
+  # halt 200, {"admin" => "#{current_user.admin}",
+  #             "mode" => "#{current_user.mode}"}.to_json
 
 end
 ####
 
 #########################################################################################################################################
 ###MMARIO######
-get '/isAdmin' do
-  api_authenticate!  
-  halt 200, {"admin" => "#{current_user.admin}",
-              "mode" => "#{current_user.mode}"}.to_json
+# get '/isAdmin' do
+#   api_authenticate!  
+#   halt 200, {"admin" => "#{current_user.admin}",
+#               "mode" => "#{current_user.mode}"}.to_json
 
-end
+# end
 ####
 
 #GEt User INformation
@@ -1119,11 +1121,36 @@ end
     #params['semester'] ? (semester = params['semester']) : (halt 400, {'message': 'Missing paramaters'}.to_json)
 
     if userid
-      u = PlannedFutureCourses.all(UserID: userid) 
+      u = PlannedFutureCourses.all(UserID: userid)
       u.size > 0 ? (halt 200, u.to_json) : (halt 400, {'message': 'User has no planned courses for selected semester'}.to_json)
 
     elsif email
       u = User.first(Email: email)
+      ac = AllCourses.all
+      results = Array.new {Hash.new}
+
+      ac.each do |i|
+        pnf = PlannedFutureCourses.first(UserID: u.id, CourseID: i.CourseID)
+        if pnf
+          results << {
+            'CourseID'      => i.CourseID,
+            'CourseDept'    => i.CourseDept,
+            'CourseNum'     => i.CourseNum,
+            'Name'          => i.Name,
+            'PlannedCoarse' => 'pc',
+          }
+        # else
+        #   results << {
+        #     'CourseID'      => i.CourseID,
+        #     'CourseDept'    => i.CourseDept,
+        #     'CourseNum'     => i.CourseNum,
+        #     'Name'          => i.Name,
+        #     'PlannedCourse' => 'n',
+        #   }
+        # end
+      end
+    end
+      halt 200, results.to_json
       if u
         list = PlannedFutureCourses.all(UserID: u.id)
         list.size > 0 ? (halt 200, list.to_json) : (halt 400, {'message': 'User has no planned courses for selected semester'}.to_json)
@@ -1136,34 +1163,34 @@ end
     end
   end
 
-      # Returns current users courses from StudentCourses
-      get '/myCourses' do
+      # # Returns current users courses from StudentCourses
+      # get '/myCourses' do
 
-        email = params['Email']
-        api_authenticate!
+      #   email = params['Email']
+      #   api_authenticate!
     
-        courses = StudentCourses.all(UserID: current_user.id)
-        table = Array.new {Hash.new}
-        courses.each do |i|
+      #   courses = StudentCourses.all(UserID: current_user.id)
+      #   table = Array.new {Hash.new}
+      #   courses.each do |i|
           
-          #We already have the CourseID, but this Will also get the dept, num, and name
-          course = AllCourses.first(CourseID: i.CourseID)
+      #     #We already have the CourseID, but this Will also get the dept, num, and name
+      #     course = AllCourses.first(CourseID: i.CourseID)
     
-          if course
-            table << {
-              'CourseID'    => course.CourseID,
-              'CourseDept'  => course.CourseDept,
-              'CourseNum'   => course.CourseNum,
-              'Name'        => course.Name,
-              'Semester'    => i.Semester,
-              'Grade'       => i.Grade,
-              'Institution' => course.Institution,
-            }
-          end
-        end
-        halt 200, table.to_json if table.size != 0
-        halt 400, {'message': 'User has no courses'}.to_json
-      end
+      #     if course
+      #       table << {
+      #         'CourseID'    => course.CourseID,
+      #         'CourseDept'  => course.CourseDept,
+      #         'CourseNum'   => course.CourseNum,
+      #         'Name'        => course.Name,
+      #         'Semester'    => i.Semester,
+      #         'Grade'       => i.Grade,
+      #         'Institution' => course.Institution,
+      #       }
+      #     end
+      #   end
+      #   halt 200, table.to_json if table.size != 0
+      #   halt 400, {'message': 'User has no courses'}.to_json
+      # end
 
         # MERGE myCourses with AllCourses, remove ones with grades. Admin and student usable.
   # params: StudentID or Email will be for admin
@@ -1179,7 +1206,7 @@ end
     if email
       halt 401, {'message': 'Unauthorized User'}.to_json if !current_user.admin 
 
-      student = User.first(email: email)
+      student = User.first(Email: email)
       halt 400, {'message': 'User not found'}.to_json if !student
       ac = AllCourses.all
 

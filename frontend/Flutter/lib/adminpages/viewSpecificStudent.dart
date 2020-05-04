@@ -30,6 +30,7 @@ class SizeConfig {
   //   double deviceHeight = SizeConfig.blockSizeVertical;
 
 }
+////////////////////////////////////////////////////***************************************************STUDENT TAKEN COURSES */
 
 class Course {
   final int courseID;
@@ -39,60 +40,75 @@ class Course {
   final String institution;
   final String grade;
   final String semester;
-  final bool taken;
+  //final bool taken;
 
   Course(this.courseID, this.courseDept, this.courseNum, this.name,
-      this.institution, this.grade, this.semester, this.taken);
+      this.institution, this.grade, this.semester);
 }
 
-Future<List<Course>> _getCourses() async {
-  String value = await storage.read(key: "token");
+Future<List<Course>> _getStudentCourses() async {
+  String studentId;
+  studentId = await storage.read(key: "studentId");
+  var response = await http.get("$address/MyAndAllCourses?Email=$studentId",
+      headers: {
+        HttpHeaders.authorizationHeader:
+            "Bearer ${await storage.read(key: "token")}"
+      });
 
-  //A will have the entire courses
-  var responseA = await http.get(
-    "$address/all/Courses",
-    headers: {HttpHeaders.authorizationHeader: "Bearer $value"},
-  );
-  if (responseA.statusCode != 200) return null;
-  //B will have the taken Courses by the student
-  var responseB = await http.get(
-    "$address/myCourses",
-    headers: {HttpHeaders.authorizationHeader: "Bearer $value"},
-  );
-  if (responseB.statusCode != 200) return null;
+  if (response.statusCode != 200) return null;
 
-  var dataA = json.decode(responseA.body);
-  var dataB = json.decode(responseB.body);
+  var data = json.decode(response.body);
 
-  List<Course> allCourses = [];
-  List<int> courseIDtoSkip = [];
+  List<Course> courses = [];
 
-  for (var i in dataB) {
-    Course myCourse = Course(i["CourseID"], i["CourseDept"], i["CourseNum"],
-        i["Name"], i["Institution"], i["Grade"], i["Semester"], true);
-
-    allCourses.add(myCourse);
-    courseIDtoSkip.add(i["CourseID"]);
-  }
-
-  //Adds the rest of the courses except the it doesnt add the ones you have taken.
-  bool flag = true;
-  for (var i in dataA) {
-    for (var j in courseIDtoSkip) {
-      if (j == i["CourseID"]) {
-        flag = false;
-      }
-    }
-    if (flag) {
+  for (var i in data) {
+    if (i["Grade"] != "n") {
       Course course = Course(i["CourseID"], i["CourseDept"], i["CourseNum"],
-          i["Name"], i["Institution"], "null", "null", false);
-      allCourses.add(course);
+          i["Name"], i["Intstitution"], i["Grade"], i["Semester"]);
+
+      courses.add(course);
     }
-    flag = true;
   }
 
-  return allCourses;
+  return courses;
 }
+
+////////////////////////////////////////////////////***************************************************PLANNED COURSES */
+class PlannedCourse {
+  final int courseID;
+  final String courseDept;
+  final int courseNum;
+  final String name;
+
+  PlannedCourse(this.courseID, this.courseDept, this.courseNum, this.name);
+}
+
+Future<List<PlannedCourse>> _getPlannedCourses() async {
+  String studentId;
+  studentId = await storage.read(key: "studentId");
+  var response = await http.get(
+      "$address/usersPlannedCoursesW/oSemester?Email=$studentId",
+      headers: {
+        HttpHeaders.authorizationHeader:
+            "Bearer ${await storage.read(key: "token")}"
+      });
+
+  if (response.statusCode != 200) return null;
+
+  var data = json.decode(response.body);
+
+  List<PlannedCourse> plannedCourses = [];
+
+  for (var i in data) {
+    PlannedCourse plannedCourse = PlannedCourse(
+        i["CourseID"], i["CourseDept"], i["CourseNum"], i["Name"]);
+
+    plannedCourses.add(plannedCourse);
+  }
+
+  return plannedCourses;
+}
+////////////////////////////////////////////////////***************************************************STUDENTINFORMATION COURSES */
 
 class Student {
   final String firstname;
@@ -133,6 +149,7 @@ Future<Student> _getUser() async {
   print("return the JSON of info ==> $data");
 
   String classification = "null";
+
   if (data["Hours"] < 90) classification = "Junior";
   if (data["Hours"] < 60) classification = "Sophmore";
   if (data["Hours"] < 30) classification = "Freshman";
@@ -144,7 +161,7 @@ Future<Student> _getUser() async {
       data["Email"],
       data["GPA"],
       data["CatalogYear"],
-      data["Classification"],
+      classification,
       data["Hours"],
       data["AdvancedCsHours"],
       data["AdvancedHours"]);
@@ -167,7 +184,8 @@ class _SpecificStudentState extends State<SpecificStudent> {
     SizeConfig().init(context);
     double deviceWidth = SizeConfig.blockSizeHorizontal;
     double deviceHeight = SizeConfig.blockSizeVertical;
-    return Column(children: [
+    return ListView(children: [
+      /////////*****************************************************FRST BOX */
       Container(
         //The First container for STUDENT INFORMATION!
         decoration: BoxDecoration(color: Color(0xff65646a)),
@@ -295,6 +313,170 @@ class _SpecificStudentState extends State<SpecificStudent> {
 
                             ///Here
                           ])),
+                    ),
+                  ],
+                ),
+              );
+            }
+          },
+        ),
+      ),
+      //*************************************************************************SECOND BOX */
+      Container(
+        //The SECOND CONTAINER FOR PLLANED COURSES
+        decoration: BoxDecoration(color: Color(0xff65646a)),
+        child: FutureBuilder(
+          future: _getPlannedCourses(),
+          builder: (BuildContext context, AsyncSnapshot snapshot) {
+            if (snapshot.data == null) {
+              print("snapshot is null :O");
+              return new Scaffold(
+                backgroundColor: Color(0xff65646a),
+                body: new Center(
+                  child: new Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      Image.asset("assets/images/image0.png"),
+                    ],
+                  ),
+                ),
+              );
+            } else {
+              print("snapshot is not null");
+              return Container(
+                width: deviceWidth * 100,
+                height: deviceHeight * 20,
+                child: Row(
+                  children: <Widget>[
+                    Container(
+                      margin: EdgeInsets.fromLTRB(deviceWidth * 1,
+                          deviceHeight * 1, deviceWidth * 1, deviceHeight * 1),
+                      //color: Color(0xffebebe8),
+                      width: deviceWidth * 98,
+                      height: deviceHeight * 35,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                            colors: [Color(0xffebebe8), Color(0xffebebe8)]),
+                        borderRadius: BorderRadius.circular(6.0),
+                      ),
+                      child: ListView.builder(
+                        itemCount: snapshot.data.length,
+                        itemBuilder: (BuildContext context, int i) {
+                          return RichText(
+                            text: TextSpan(
+                                style: TextStyle(
+                                    color: Color(0xffcf4411),
+                                    fontWeight: FontWeight.bold,
+                                    height: deviceHeight * 0.2,
+                                    fontSize: deviceHeight * 2.28),
+                                children: <TextSpan>[
+                                  TextSpan(
+                                    text:  "${snapshot.data[i].courseDept} ",
+                                    style: TextStyle(
+                                        color: Colors.black.withOpacity(1.0)),
+                                  ),
+                                  TextSpan(
+                                    text:  "${snapshot.data[i].courseNum}",
+                                    style: TextStyle(
+                                        color: Colors.black.withOpacity(1.0)),
+                                  ),
+                                  TextSpan(
+                                    text:  "\n${snapshot.data[i].name}",
+                                    style: TextStyle(
+                                        color: Colors.black.withOpacity(1.0)),
+                                  ),
+                                ]),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+          },
+        ),
+      ),
+            //*************************************************************************THIRD BOX */
+      Container(
+        //The THIRD CONTAINER FOR  COURSES
+        decoration: BoxDecoration(color: Color(0xff65646a)),
+        child: FutureBuilder(
+          future: _getStudentCourses(),
+          builder: (BuildContext context, AsyncSnapshot snapshot) {
+            if (snapshot.data == null) {
+              print("snapshot is null :O");
+              return new Scaffold(
+                backgroundColor: Color(0xff65646a),
+                body: new Center(
+                  child: new Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      Image.asset("assets/images/image0.png"),
+                    ],
+                  ),
+                ),
+              );
+            } else {
+              print("snapshot is not null");
+              return Container(
+                width: deviceWidth * 100,
+                height: deviceHeight * 35,
+                child: Row(
+                  children: <Widget>[
+                    Container(
+                      margin: EdgeInsets.fromLTRB(deviceWidth * 1,
+                          deviceHeight * 1, deviceWidth * 1, deviceHeight * 1),
+                      //color: Color(0xffebebe8),
+                      width: deviceWidth * 98,
+                      height: deviceHeight * 35,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                            colors: [Color(0xffebebe8), Color(0xffebebe8)]),
+                        borderRadius: BorderRadius.circular(6.0),
+                      ),
+                      child: ListView.builder(
+                        itemCount: snapshot.data.length,
+                        itemBuilder: (BuildContext context, int i) {
+                          return RichText(
+                            text: TextSpan(
+                                style: TextStyle(
+                                    color: Color(0xffcf4411),
+                                    fontWeight: FontWeight.bold,
+                                    height: deviceHeight * 0.2,
+                                    fontSize: deviceHeight * 2.28),
+                                children: <TextSpan>[
+                                  TextSpan(
+                                    text:  "${snapshot.data[i].courseDept} ",
+                                    style: TextStyle(
+                                        color: Colors.black.withOpacity(0.7)),
+                                  ),
+                                  TextSpan(
+                                    text:  "${snapshot.data[i].courseNum}",
+                                    style: TextStyle(
+                                        color: Colors.black.withOpacity(0.7)),
+                                  ),
+                                  TextSpan(
+                                    text:  "\n${snapshot.data[i].name}",
+                                    style: TextStyle(
+                                        color: Colors.black.withOpacity(0.5)),
+                                  ),
+                                  TextSpan(
+                                    text:  "\n Grade: ${snapshot.data[i].grade}   Semester: ${snapshot.data[i].semester}",
+                                    style: TextStyle(
+                                        color: Colors.black.withOpacity(1.0)),
+                                  ),
+                                  TextSpan(
+                                    text:  "\n",
+                                    style: TextStyle(
+                                        color: Colors.black.withOpacity(1.0)),
+                                  ),
+                                ]),
+                          );
+                        },
+                      ),
                     ),
                   ],
                 ),

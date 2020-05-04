@@ -175,54 +175,6 @@ class Course {
       this.institution, this.grade, this.semester, this.taken);
 }
 
-Future<List<Course>> _getCourses() async {
-  String value = await storage.read(key: "token");
-
-  //A will have the entire courses
-  var responseA = await http.get(
-    "$address/all/Courses",
-    headers: {HttpHeaders.authorizationHeader: "Bearer $value"},
-  );
-  if (responseA.statusCode != 200) return null;
-  //B will have the taken Courses by the student
-  var responseB = await http.get(
-    "$address/myCourses",
-    headers: {HttpHeaders.authorizationHeader: "Bearer $value"},
-  );
-  if (responseB.statusCode != 200) return null;
-
-  var dataA = json.decode(responseA.body);
-  var dataB = json.decode(responseB.body);
-
-  List<Course> allCourses = [];
-  List<int> courseIDtoSkip = [];
-
-  for (var i in dataB) {
-    Course myCourse = Course(i["CourseID"], i["CourseDept"], i["CourseNum"],
-        i["Name"], i["Institution"], i["Grade"], i["Semester"], true);
-
-    allCourses.add(myCourse);
-    courseIDtoSkip.add(i["CourseID"]);
-  }
-
-  //Adds the rest of the courses except the it doesnt add the ones you have taken.
-  bool flag = true;
-  for (var i in dataA) {
-    for (var j in courseIDtoSkip) {
-      if (j == i["CourseID"]) {
-        flag = false;
-      }
-    }
-    if (flag) {
-      Course course = Course(i["CourseID"], i["CourseDept"], i["CourseNum"],
-          i["Name"], i["Institution"], "null", "null", false);
-      allCourses.add(course);
-    }
-    flag = true;
-  }
-
-  return allCourses;
-}
 
 class Student {
   final String firstname;

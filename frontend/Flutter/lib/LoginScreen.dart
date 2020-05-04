@@ -46,33 +46,8 @@ class SizeConfig {
 TextEditingController usernameTextCtrl = TextEditingController();
 TextEditingController passwordTextCtrl = TextEditingController();
 
-Future<int> isMinor() async {
-  //String username,password,fn,ln,id;
-
-  final response = await http.get("$address/isAdmin", headers: {
-    HttpHeaders.authorizationHeader: "${await storage.read(key: "token")}"
-  });
-  print(await storage.read(key: "token"));
-  if (response.statusCode == 200 &&
-      json.decode(response.body)["mode"] == "minor") return 1;
-  return 0;
-}
-
-Future<int> isAdmin() async {
-  //String username,password,fn,ln,id;
-
-  final response = await http.get("$address/isAdmin", headers: {
-    HttpHeaders.authorizationHeader: "${await storage.read(key: "token")}"
-  });
-  print(await storage.read(key: "token"));
-
-  if (response.statusCode == 200 &&
-      json.decode(response.body)["admin"] == "true") return 1;
-
-  return 0;
-}
-
-Future<int> code() async {
+//
+Future<int> loginStatusCode() async {
   //String username,password,fn,ln,id;
 
   final response = await http.get(
@@ -84,7 +59,6 @@ Future<int> code() async {
   if (response.statusCode == 200) {
     Map<String, dynamic> data = json.decode(response.body);
     await storage.write(key: "token", value: data["token"]);
-    String value = await storage.read(key: "token");
     return response.statusCode;
   }
   if (response.statusCode != null) {
@@ -92,6 +66,20 @@ Future<int> code() async {
   }
   return 0;
 }
+
+Future<int> isAdmin() async {
+  //String username,password,fn,ln,id;
+
+  var response = await http.get("$address/isAdmin", headers: {
+    HttpHeaders.authorizationHeader: "Bearer ${await storage.read(key: "token")}"
+  });
+
+  if (response.statusCode == 200) return 200;
+  print("IS ADMIN!!!!!!!");
+  return 2;
+}
+
+
 
 class LoginScreen extends StatefulWidget {
   //LoginScreen({Key key, this.title}) : super(key: key);
@@ -103,9 +91,9 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  int statusCode = 0;
-  int admin = 0;
-  int major = 1;
+  int statusCode;
+  int admin;
+  //int major = 1;
   @override
   Widget build(BuildContext context) {
     SizeConfig().init(context);
@@ -188,36 +176,31 @@ class _LoginScreenState extends State<LoginScreen> {
                       text: "Login",
                       background: Color(0xffcf4411),
                       onPressed: () async {
-                        statusCode = await code();
+                        statusCode = await loginStatusCode();
                         admin = await isAdmin();
-                        major = await isMinor();
+                        print("This is the isAdmin result => $admin");
+                        Future.delayed(Duration(seconds: 1));
+                        //major = await isMinor();
                         if (statusCode != 200) {
                           showDialog(
                             context: context,
-                            // builder: (_) =>
-                            //     Popup(message: "Invalid Credentials"),
+                            builder: (_) =>
+                                Popup(message: "Invalid Credentials"),
                           );
                         }
-                        if (statusCode == 200 && admin == 0 && major == 1) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => StudentMainScreen()),
-                          );
-                        }
-                        if (statusCode == 200 && admin == 0 && major == 0) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => StudentMainScreen()),
-                          );
-                        }
-                        if (statusCode == 200 && admin == 1) {
-                          print("ADMIN");
+                    
+                        else if (statusCode == 200 && admin == 200) {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
                                 builder: (context) => AdminMainScreen()),
+                          );
+                        }
+                        else if (statusCode == 200) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => DegreePageMimic()),
                           );
                         }
                       },
@@ -274,7 +257,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 textColor: Color(0xffcf4411),
                 background: Color(0xffebebe8),
                 onPressed: () async {
-                  statusCode = await code();
+                  statusCode = await loginStatusCode();
 
                   Navigator.push(
                     context,
@@ -289,3 +272,14 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
+//Future<int> isMinor() async {
+//   //String username,password,fn,ln,id;
+
+//   final response = await http.get("$address/isAdmin", headers: {
+//     HttpHeaders.authorizationHeader: "${await storage.read(key: "token")}"
+//   });
+//   print(await storage.read(key: "token"));
+//   if (response.statusCode == 200 &&
+//       json.decode(response.body)["mode"] == "minor") return 1;
+//   return 0;
+// }
