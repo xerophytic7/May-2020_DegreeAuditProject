@@ -149,12 +149,12 @@ Future<Student> _getUser() async {
   print("return the JSON of info ==> $data");
 
   String classification = "null";
-
+  if(data["Hours"] != null ){
   if (data["Hours"] < 90) classification = "Junior";
   if (data["Hours"] < 60) classification = "Sophmore";
   if (data["Hours"] < 30) classification = "Freshman";
   if (data["Hours"] > 90) classification = "Senior";
-
+  }
   Student student = Student(
       data["FirstName"],
       data["LastName"],
@@ -382,7 +382,7 @@ class _SpecificStudentState extends State<SpecificStudent> {
                                         color: Colors.black.withOpacity(1.0)),
                                   ),
                                   TextSpan(
-                                    text:  "\n${snapshot.data[i].name}",
+                                    text:  "\n${snapshot.data[i].name}\n",
                                     style: TextStyle(
                                         color: Colors.black.withOpacity(1.0)),
                                   ),

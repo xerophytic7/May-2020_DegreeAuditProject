@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:nice_button/NiceButton.dart';
 import 'package:seniordesign/globals/globals.dart';
 import 'dart:async';
 import 'package:http/http.dart' as http;
@@ -30,7 +31,12 @@ class SizeConfig {
   //   double deviceHeight = SizeConfig.blockSizeVertical;
 
 }
+Future<List<int>>  _neverNull() async{
+   List<int> list = [];
+   list.add(0);
+  return list;
 
+}
 class Course {
   final int courseID;
   final String courseDept;
@@ -140,11 +146,12 @@ Future<Student> _getUser() async {
 
   String classification = "null";
 
-  if (data["Hours"] < 90) classification = "Junior";
-  if (data["Hours"] < 60) classification = "Sophmore";
-  if (data["Hours"] < 30) classification = "Freshman";
-  if (data["Hours"] > 90) classification = "Senior";
-
+  if (data["Hours"] != null) {
+    if (data["Hours"] < 90) classification = "Junior";
+    if (data["Hours"] < 60) classification = "Sophmore";
+    if (data["Hours"] < 30) classification = "Freshman";
+    if (data["Hours"] > 90) classification = "Senior";
+  }
   Student student = Student(
       data["FirstName"],
       data["LastName"],
@@ -318,7 +325,7 @@ class _DegreePageMimicState extends State<DegreePageMimic> {
         //The SECOND CONTAINER FOR PLLANED COURSES
         decoration: BoxDecoration(color: Color(0xff65646a)),
         child: FutureBuilder(
-          future: _getPlannedCourses(),
+          future: _neverNull(),
           builder: (BuildContext context, AsyncSnapshot snapshot) {
             if (snapshot.data == null) {
               print("snapshot is null :O");
@@ -448,10 +455,9 @@ class _DegreePageMimicState extends State<DegreePageMimic> {
                               //trailing: Icon(Icons.more_vert),
                               onTap: () async {
                                 await storage.write(
-                                    key: "CourseSelected",
+                                    key: "CourseName",
                                     value: "Digital Systems Engineering I");
-                                print(
-                                    await storage.read(key: "CourseSelected"));
+                                print(await storage.read(key: "CourseName"));
                                 showDialog(
                                   context: context,
                                   builder: (_) => EditPopUp(),
@@ -545,7 +551,7 @@ class EditPopUpState extends State<EditPopUp>
     double deviceHeight = SizeConfig.blockSizeVertical;
     String dropdownValueForGrade = 'A';
     String dropDownValueForSemester = "Fall";
-    String newValueForGrade= 'null';
+    String newValueForGrade = 'null';
     return Center(
       child: Material(
         color: Colors.transparent,
@@ -597,6 +603,110 @@ class EditPopUpState extends State<EditPopUp>
                     );
                   }).toList(),
                 ),
+                //************************FOR SEMESTER********************** */
+                RichText(
+                  text: TextSpan(
+                    style: TextStyle(
+                        color: Color(0xffcf4411),
+                        fontWeight: FontWeight.bold,
+                        height: deviceHeight * 0.2,
+                        fontSize: deviceHeight * 2.28),
+                    children: <TextSpan>[
+                      TextSpan(
+                        text: 'Semester:',
+                        style: TextStyle(color: Colors.black.withOpacity(0.5)),
+                      )
+                    ],
+                  ),
+                ),
+                DropdownButton<String>(
+                  value: dropDownValueForSemester,
+                  icon: Icon(Icons.arrow_downward),
+                  iconSize: 24,
+                  elevation: 16,
+                  style: TextStyle(color: Colors.black),
+                  onChanged: (newValueForSemester) {
+                    setState(() async {
+                      dropDownValueForSemester = newValueForSemester;
+                      await storage.write(
+                          key: "CourseSemester", value: "$newValueForSemester");
+                      print(await storage.read(key: "CourseSemester"));
+                    });
+                  },
+                  items: <String>['Fall', 'Spring', 'Summer I', 'Summer II']
+                      .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                ),
+                Row(
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(deviceHeight * 1,
+                          deviceHeight * 1, deviceWidth * 1, deviceWidth * 1),
+                      child: NiceButton(
+                        width: deviceWidth * 35,
+                        elevation: 8.0,
+                        radius: 52.0,
+                        text: "Add\n Course",
+                        fontSize: deviceHeight * 2,
+                        background: Color(0xffcf4411),
+                        onPressed: () async {
+                          await addCourse();
+                          Navigator.pop(context);
+                        },
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(deviceHeight * 1,
+                          deviceHeight * 1, deviceWidth * 1, deviceWidth * 1),
+                      child: NiceButton(
+                        width: deviceWidth * 35,
+                        elevation: 8.0,
+                        radius: 52.0,
+                        text: "Remove \nCourse",
+                        fontSize: deviceHeight * 2,
+                        background: Color(0xffcf4411),
+                        onPressed: () async {
+                          await delCourse();
+                          Navigator.pop(context);
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(deviceHeight * 1,
+                          deviceHeight * 1, deviceWidth * 1, deviceWidth * 1),
+                      child: NiceButton(
+                        width: deviceWidth * 35,
+                        elevation: 8.0,
+                        radius: 52.0,
+                        text: "Add\nPlanned Course",
+                        fontSize: deviceHeight * 2,
+                        background: Color(0xffcf4411),
+                        onPressed: () async {},
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(deviceHeight * 1,
+                          deviceHeight * 1, deviceWidth * 1, deviceWidth * 1),
+                      child: NiceButton(
+                        width: deviceWidth * 35,
+                        elevation: 8.0,
+                        radius: 52.0,
+                        text: "Remove \nPlanned Course",
+                        fontSize: deviceHeight * 2,
+                        background: Color(0xffcf4411),
+                        onPressed: () async {},
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
@@ -604,4 +714,30 @@ class EditPopUpState extends State<EditPopUp>
       ),
     );
   }
+}
+
+Future<int> addCourse() async {
+  var response = await http.post(
+      "$address/selfadd/StudentCourses?Semester=${await storage.read(key: "CourseSemester")}&Grade=${await storage.read(key: "CourseGrade")}&CourseName=${await storage.read(key: "CourseName")}",
+      headers: {
+        HttpHeaders.authorizationHeader:
+            "Bearer ${await storage.read(key: "token")}"
+      });
+  print(
+      "$address/selfadd/StudentCourses?Semester=${await storage.read(key: "CourseSemester")}&Grade=${await storage.read(key: "CourseGrade")}&CourseName=${await storage.read(key: "CourseName")}");
+  print(
+      "This is the response status code for addCourse() = ${response.statusCode}");
+  return response.statusCode;
+}
+
+Future<int> delCourse() async {
+  var response = await http.delete(
+      "$address/remove/StudentCourse?CourseName=${await storage.read(key: "CourseName")}",
+      headers: {
+        HttpHeaders.authorizationHeader:
+            "Bearer ${await storage.read(key: "token")}"
+      });
+  print(
+      "This is the response status code for delCourse() = ${response.statusCode}");
+  return response.statusCode;
 }

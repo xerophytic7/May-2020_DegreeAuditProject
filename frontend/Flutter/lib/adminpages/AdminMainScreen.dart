@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:nice_button/NiceButton.dart';
+import 'package:seniordesign/adminpages/AddCourseAdmin.dart';
 import 'package:seniordesign/adminpages/viewSpecificStudent.dart';
 import 'package:seniordesign/globals/globals.dart';
 import 'dart:async';
@@ -147,14 +148,241 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
               margin: EdgeInsets.fromLTRB(deviceWidth * 1, deviceHeight * 1,
                   deviceWidth * 1, deviceHeight * 1),
               width: deviceHeight * 100,
-              height: deviceHeight * 30,
+              height: deviceHeight * 90,
               decoration: BoxDecoration(color: Color(0xffebebe8), boxShadow: [
                 BoxShadow(
                     color: Colors.black.withOpacity(.3),
                     offset: Offset(0.0, 8.0),
                     blurRadius: 8.0)
+                    
               ]),
+            child: ListView(
+              children: [ Row(
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(deviceHeight * 5,
+                          deviceHeight * 4, deviceWidth * 1, deviceHeight * 1),
+                      child: NiceButton(
+                        background: Color(0xffebebe8),
+                        text: "Add \nCourse",
+                        textColor: Color(0xffcf4411),
+                        fontSize: deviceWidth * 5,
+                        width: deviceWidth * 30,
+                        elevation: deviceHeight * 1,
+                        //icon: Icons.call_made,
+                        //iconColor: Color(0xffcf4411),
+                        onPressed: () async {
+                          print("ABCC");
+                          
+                          await storage.write(
+                              key: "studentId", value: studentIdTextCtrl.text);
+                          
+                          print("This is the STudentID controller ${studentIdTextCtrl.text}, \n This is what is being stored on the device ${await storage.read(key: "studentId")}");
+                          
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => AddCourseAdmin()),
+                          );
+                        },
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(deviceHeight * 1,
+                          deviceHeight * 4, deviceWidth * 4, deviceHeight * 1),
+                      child: NiceButton(
+                        background: Color(0xffebebe8),
+                        text: "Planned\n Courses",
+                        textColor: Color(0xffcf4411),
+                        fontSize: deviceWidth * 5,
+                        width: deviceWidth * 30,
+                        elevation: deviceHeight * 1,
+                        //icon: Icons.call_made,
+                        //iconColor: Color(0xffcf4411),
+                        onPressed: () async {
+                          String studentId;
+                          await storage.write(
+                              key: studentId, value: studentIdTextCtrl.text);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => SpecificStudent()),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(deviceHeight * 5,
+                          deviceHeight * 4, deviceWidth * 1, deviceHeight * 1),
+                      child: NiceButton(
+                        background: Color(0xffebebe8),
+                        text: "Student\n Course",
+                        textColor: Color(0xffcf4411),
+                        fontSize: deviceWidth * 5,
+                        width: deviceWidth * 30,
+                        elevation: deviceHeight * 1,
+                        //icon: Icons.call_made,
+                        //iconColor: Color(0xffcf4411),
+                        onPressed: () async {
+                          print("ABCC");
+                          
+                          await storage.write(
+                              key: "studentId", value: studentIdTextCtrl.text);
+                          
+                          print("This is the STudentID controller ${studentIdTextCtrl.text}, \n This is what is being stored on the device ${await storage.read(key: "studentId")}");
+                          
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => SpecificStudent()),
+                          );
+                        },
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(deviceHeight * 1,
+                          deviceHeight * 4, deviceWidth * 4, deviceHeight * 1),
+                      child: NiceButton(
+                        background: Color(0xffebebe8),
+                        text: "Add \nCategory",
+                        textColor: Color(0xffcf4411),
+                        fontSize: deviceWidth * 5,
+                        width: deviceWidth * 30,
+                        elevation: deviceHeight * 1,
+                        //icon: Icons.call_made,
+                        //iconColor: Color(0xffcf4411),
+                        onPressed: () async {
+                          String studentId;
+                          await storage.write(
+                              key: studentId, value: studentIdTextCtrl.text);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => SpecificStudent()),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(deviceHeight * 5,
+                          deviceHeight * 4, deviceWidth * 1, deviceHeight * 1),
+                      child: NiceButton(
+                        background: Color(0xffebebe8),
+                        text: "Assign \n Category",
+                        textColor: Color(0xffcf4411),
+                        fontSize: deviceWidth * 5,
+                        width: deviceWidth * 30,
+                        elevation: deviceHeight * 1,
+                        //icon: Icons.call_made,
+                        //iconColor: Color(0xffcf4411),
+                        onPressed: () async {
+                          print("ABCC");
+                          
+                          await storage.write(
+                              key: "studentId", value: studentIdTextCtrl.text);
+                          
+                          print("This is the STudentID controller ${studentIdTextCtrl.text}, \n This is what is being stored on the device ${await storage.read(key: "studentId")}");
+                          
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => SpecificStudent()),
+                          );
+                        },
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(deviceHeight * 1,
+                          deviceHeight * 4, deviceWidth * 4, deviceHeight * 1),
+                      child: NiceButton(
+                        background: Color(0xffebebe8),
+                        text: "Add\n Prereq",
+                        textColor: Color(0xffcf4411),
+                        fontSize: deviceWidth * 5,
+                        width: deviceWidth * 30,
+                        elevation: deviceHeight * 1,
+                        //icon: Icons.call_made,
+                        //iconColor: Color(0xffcf4411),
+                        onPressed: () async {
+                          String studentId;
+                          await storage.write(
+                              key: studentId, value: studentIdTextCtrl.text);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => SpecificStudent()),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(deviceHeight * 5,
+                          deviceHeight * 4, deviceWidth * 1, deviceHeight * 1),
+                      child: NiceButton(
+                        background: Color(0xffebebe8),
+                        text: "Create\n DegPlan",
+                        textColor: Color(0xffcf4411),
+                        fontSize: deviceWidth * 5,
+                        width: deviceWidth * 30,
+                        elevation: deviceHeight * 1,
+                        //icon: Icons.call_made,
+                        //iconColor: Color(0xffcf4411),
+                        onPressed: () async {
+                          print("ABCC");
+                          
+                          await storage.write(
+                              key: "studentId", value: studentIdTextCtrl.text);
+                          
+                          print("This is the STudentID controller ${studentIdTextCtrl.text}, \n This is what is being stored on the device ${await storage.read(key: "studentId")}");
+                          
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => SpecificStudent()),
+                          );
+                        },
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(deviceHeight * 1,
+                          deviceHeight * 4, deviceWidth * 4, deviceHeight * 1),
+                      child: NiceButton(
+                        background: Color(0xffebebe8),
+                        text: "Planned\n Courses",
+                        textColor: Color(0xffcf4411),
+                        fontSize: deviceWidth * 5,
+                        width: deviceWidth * 30,
+                        elevation: deviceHeight * 1,
+                        //icon: Icons.call_made,
+                        //iconColor: Color(0xffcf4411),
+                        onPressed: () async {
+                          String studentId;
+                          await storage.write(
+                              key: studentId, value: studentIdTextCtrl.text);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => SpecificStudent()),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),]
             )
+           )
           ],
         ));
   }
