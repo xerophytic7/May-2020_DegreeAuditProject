@@ -596,7 +596,7 @@ end
     if email
       halt 401, {'message': 'Unauthorized User'}.to_json if !current_user.admin 
 
-      student = User.first(id: email)
+      student = User.first(Email: email)
       halt 400, {'message': 'User not found'}.to_json if !student
       ac = AllCourses.all
 
