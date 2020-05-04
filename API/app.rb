@@ -679,6 +679,7 @@ end
   end
   
   
+  
   # Read from PlannedFutureCourses table given a semester  
   get '/PlannedCourses' do
     api_authenticate!
@@ -1163,34 +1164,31 @@ end
     end
   end
 
-      # # Returns current users courses from StudentCourses
-      # get '/myCourses' do
+  ### Function I need
+  get '/myPlannedCoursesW/oSemester' do
+    api_authenticate!
 
-      #   email = params['Email']
-      #   api_authenticate!
-    
-      #   courses = StudentCourses.all(UserID: current_user.id)
-      #   table = Array.new {Hash.new}
-      #   courses.each do |i|
-          
-      #     #We already have the CourseID, but this Will also get the dept, num, and name
-      #     course = AllCourses.first(CourseID: i.CourseID)
-    
-      #     if course
-      #       table << {
-      #         'CourseID'    => course.CourseID,
-      #         'CourseDept'  => course.CourseDept,
-      #         'CourseNum'   => course.CourseNum,
-      #         'Name'        => course.Name,
-      #         'Semester'    => i.Semester,
-      #         'Grade'       => i.Grade,
-      #         'Institution' => course.Institution,
-      #       }
-      #     end
-      #   end
-      #   halt 200, table.to_json if table.size != 0
-      #   halt 400, {'message': 'User has no courses'}.to_json
-      # end
+     # u = User.first(id: current_user.id)
+      ac = AllCourses.all
+      results = Array.new {Hash.new}
+
+      ac.each do |i|
+        pnf = PlannedFutureCourses.first(UserID: current_user.id, CourseID: i.CourseID)
+        if pnf
+          results << {
+            'CourseID'      => i.CourseID,
+            'CourseDept'    => i.CourseDept,
+            'CourseNum'     => i.CourseNum,
+            'Name'          => i.Name,
+            'PlannedCoarse' => 'pc',
+          }
+        end
+      end
+      halt 200, results.to_json
+  end
+
+
+
 
         # MERGE myCourses with AllCourses, remove ones with grades. Admin and student usable.
   # params: StudentID or Email will be for admin
@@ -1302,6 +1300,101 @@ end
 
     end
   end
+#### Wink Wink my doods
+  post '/selfadd/StudentCourses' do
+    
+    api_authenticate!
+    if !(params["CourseNum"] or params["CourseDept"] or params["CourseName"])
+      userid = current_user.id
+      params["CourseID"] ? (courseid = params['CourseID']): (halt 400, {"message": "Missing CourseID paramater"}.to_json)
+      params["Semester"] ? (semester = params['Semester']): (halt 400, {"message": "Missing Semester paramater"}.to_json)
+      params["Grade"] ? (grade = params['Grade']): (halt 400, {"message": "Missing Grade paramater"}.to_json)
+      notes = params['Notes']
+    elsif !params["CourseID"]
+      
+      #params["CourseNum"] ? (courseNum = params['CourseID']): (halt 400, {"message": "Missing CourseID paramater"}.to_json)
+      #params["CourseNum"] ? (courseDept = params['CourseID']): (halt 400, {"message": "Missing CourseID paramater"}.to_json)
+      
+      c = AllCourses.first(Name: params["CourseName"])
+      courseid = c.CourseID
+      #halt 200, c.to_json
+      #property :CourseDept, String
+      #property :CourseNum, Integer
+
+      params["Semester"] ? (semester = params['Semester']): (halt 400, {"message": "Missing Semester paramater"}.to_json)
+      params["Grade"] ? (grade = params['Grade']): (halt 400, {"message": "Missing Grade paramater"}.to_json)
+      notes = params['Notes']
+    end
+
+
+
+
+
+    if !is_number?(courseid)
+      halt 400, {'message': 'CourseID param not an integer'}.to_json
+    end
+
+    if courseid != '' && semester != '' && grade != ''
+      if userid
+        #if current_user.admin
+
+          #*************** DUPLICATE CHECK *************
+          halt 409, {'message': 'Duplicate Entry'}.to_json if StudentCourses.first(UserID: userid, CourseID: courseid)
+          #************************************************
+
+          # I COULD CHECK IF COURSE CATALOG YEAR MATCHES USER CATALOG YEAR
+          # i.f same_catalog_year(courseid, userid)    
+          # BUT NOT SURE WHY WE'D NEED THIS CHECK HERE
+          c = StudentCourses.new
+          userid != '' ? (c.UserID = userid) : (halt 400, {"message": "Missing UserID paramater"}.to_json)
+          c.CourseID = courseid
+          c.Semester = semester
+          c.Grade = grade
+          if notes != nil
+            c.Notes = notes 
+          end
+          c.save
+          halt 201, {"message": "Course added successfully"}.to_json
+        #else
+         # halt 401, {"message": "Unauthorized user"}.to_json
+        #end
+      else
+         #*************** DUPLICATE CHECK *************
+         halt 409, {'message': 'Duplicate Entry'}.to_json if StudentCourses.first(UserID: current_user.id, CourseID: courseid)
+         #************************************************
+
+        # I COULD CHECK IF COURSE CATALOG YEAR MATCHES USER CATALOG YEAR
+        # i.f same_catalog_year(courseid, current_user.id)
+        # BUT NOT SURE WHY WE'D NEED THIS CHECK HERE
+        c = StudentCourses.new
+        c.UserID = current_user.id
+        c.CourseID = courseid
+        c.Semester = semester
+        c.Grade = grade
+        if notes != nil
+          c.Notes = notes
+        end
+        c.save
+        halt 201, {"message": "Course added successfully"}.to_json
+      end
+    else
+      halt 400, {"message": "CourseID, Semester, or Grade paramaters can't be empty strings"}.to_json
+    end
+  end
+  ##A student should be able to remove their own course - mario
+  delete '/remove/StudentCourse' do
+    api_authenticate!
+    params["CourseID"] ? ID = params["CourseID"] : (halt 400, {"message": "Missing Parameters"}.to_json)
+
+    Target = StudentCourses.first(UserID: current_user.id, CourseID: ID)
+    if Target
+       Target.destroy
+       halt 200, {"message": "Deleted Successfully"}.to_json
+    else
+       halt 404, {"message": "Object Not Found"}
+  end
+ end
+#the flutter guy
 
 
 ## Courses by Dept Hug0
@@ -1379,3 +1472,6 @@ end
       halt 400, {'message': 'User has no courses in this department'}.to_json
   end
 end
+
+
+

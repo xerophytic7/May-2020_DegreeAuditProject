@@ -464,7 +464,7 @@ class _SpecificStudentState extends State<SpecificStudent> {
                                         color: Colors.black.withOpacity(0.5)),
                                   ),
                                   TextSpan(
-                                    text:  "\n Grade: ${snapshot.data[i].grade}   Semester: ${snapshot.data[i].semester}",
+                                    text:  "\n Grade: ${snapshot.data[i].grade}  Semester: ${snapshot.data[i].semester}",
                                     style: TextStyle(
                                         color: Colors.black.withOpacity(1.0)),
                                   ),

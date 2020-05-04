@@ -71,15 +71,14 @@ Future<int> isAdmin() async {
   //String username,password,fn,ln,id;
 
   var response = await http.get("$address/isAdmin", headers: {
-    HttpHeaders.authorizationHeader: "Bearer ${await storage.read(key: "token")}"
+    HttpHeaders.authorizationHeader:
+        "Bearer ${await storage.read(key: "token")}"
   });
 
   if (response.statusCode == 200) return 200;
   print("IS ADMIN!!!!!!!");
   return 2;
 }
-
-
 
 class LoginScreen extends StatefulWidget {
   //LoginScreen({Key key, this.title}) : super(key: key);
@@ -104,9 +103,14 @@ class _LoginScreenState extends State<LoginScreen> {
       body: new Center(
         child: new ListView(
           children: <Widget>[
-            Image.asset("assets/images/image0.png"),
+            Padding(
+              padding: EdgeInsets.fromLTRB(deviceHeight * 1, deviceHeight * 10,
+                  deviceWidth * 1, deviceWidth * 1),
+              child: Image.asset("assets/images/image0.png"),
+            ),
             Container(
-              margin: const EdgeInsets.all(10.0),
+              margin: EdgeInsets.fromLTRB(deviceHeight * 1, deviceHeight * 1,
+                  deviceWidth * 1, deviceWidth * 20),
               //color: Color(0xffebebe8),
               width: deviceWidth * 100,
               height: deviceHeight * 38,
@@ -187,16 +191,13 @@ class _LoginScreenState extends State<LoginScreen> {
                             builder: (_) =>
                                 Popup(message: "Invalid Credentials"),
                           );
-                        }
-                    
-                        else if (statusCode == 200 && admin == 200) {
+                        } else if (statusCode == 200 && admin == 200) {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
                                 builder: (context) => AdminMainScreen()),
                           );
-                        }
-                        else if (statusCode == 200) {
+                        } else if (statusCode == 200) {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -228,44 +229,44 @@ class _LoginScreenState extends State<LoginScreen> {
                 ],
               ),
             ),
-            Padding(
-              padding: EdgeInsets.fromLTRB(deviceHeight * 1, deviceHeight * 1,
-                  deviceWidth * 1, deviceWidth * 1),
-              child: NiceButton(
-                width: deviceWidth * 60,
-                elevation: 8,
-                radius: 52.0,
-                text: "DegreePlan Login",
-                textColor: Color(0xffcf4411),
-                background: Color(0xffebebe8),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => DegreePageMimic()),
-                  );
-                },
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.fromLTRB(deviceHeight * 1, deviceHeight * 1,
-                  deviceWidth * 1, deviceWidth * 1),
-              child: NiceButton(
-                width: deviceWidth * 60,
-                elevation: 8,
-                radius: 52.0,
-                text: "Admin",
-                textColor: Color(0xffcf4411),
-                background: Color(0xffebebe8),
-                onPressed: () async {
-                  statusCode = await loginStatusCode();
+            // Padding(
+            //   padding: EdgeInsets.fromLTRB(deviceHeight * 1, deviceHeight * 1,
+            //       deviceWidth * 1, deviceWidth * 1),
+            //   child: NiceButton(
+            //     width: deviceWidth * 60,
+            //     elevation: 8,
+            //     radius: 52.0,
+            //     text: "DegreePlan Login",
+            //     textColor: Color(0xffcf4411),
+            //     background: Color(0xffebebe8),
+            //     onPressed: () {
+            //       Navigator.push(
+            //         context,
+            //         MaterialPageRoute(builder: (context) => DegreePageMimic()),
+            //       );
+            //     },
+            //   ),
+            // ),
+            // Padding(
+            //   padding: EdgeInsets.fromLTRB(deviceHeight * 1, deviceHeight * 1,
+            //       deviceWidth * 1, deviceWidth * 1),
+            //   child: NiceButton(
+            //     width: deviceWidth * 60,
+            //     elevation: 8,
+            //     radius: 52.0,
+            //     text: "Admin",
+            //     textColor: Color(0xffcf4411),
+            //     background: Color(0xffebebe8),
+            //     onPressed: () async {
+            //       statusCode = await loginStatusCode();
 
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => AdminMainScreen()),
-                  );
-                },
-              ),
-            ),
+            //       Navigator.push(
+            //         context,
+            //         MaterialPageRoute(builder: (context) => AdminMainScreen()),
+            //       );
+            //     },
+            //   ),
+            // ),
           ],
         ),
       ),

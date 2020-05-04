@@ -22,7 +22,7 @@ class SizeConfig {
     blockSizeHorizontal = screenWidth / 100;
     blockSizeVertical = screenHeight / 100;
   }
-  
+
   // Example
   // Widget build(BuildContext context) {
   //   SizeConfig().init(context);
@@ -39,72 +39,80 @@ class Course {
   final String institution;
   final String grade;
   final String semester;
-  final bool taken;
+  //final bool taken;
 
   Course(this.courseID, this.courseDept, this.courseNum, this.name,
-      this.institution, this.grade, this.semester, this.taken);
+      this.institution, this.grade, this.semester);
 }
 
-Future<List<Course>> _getCourses() async {
-  String value = await storage.read(key: "token");
+Future<List<Course>> _getStudentCourses() async {
+  var response = await http.get("$address/MyAndAllCourses", headers: {
+    HttpHeaders.authorizationHeader:
+        "Bearer ${await storage.read(key: "token")}"
+  });
 
-  //A will have the entire courses
-  var responseA = await http.get(
-    "$address/all/Courses",
-    headers: {HttpHeaders.authorizationHeader: "Bearer $value"},
-  );
-  if (responseA.statusCode != 200) return null;
-  //B will have the taken Courses by the student
-  var responseB = await http.get(
-    "$address/myCourses",
-    headers: {HttpHeaders.authorizationHeader: "Bearer $value"},
-  );
-  if (responseB.statusCode != 200) return null;
+  if (response.statusCode != 200) return null;
 
-  
-  var dataA = json.decode(responseA.body);
-  var dataB = json.decode(responseB.body);
+  var data = json.decode(response.body);
 
-  List<Course> allCourses = [];
-  List<int> courseIDtoSkip = [];
+  List<Course> courses = [];
 
-  for (var i in dataB) {
-    Course myCourse = Course(i["CourseID"], i["CourseDept"], i["CourseNum"],
-        i["Name"], i["Institution"], i["Grade"], i["Semester"], true);
-
-    allCourses.add(myCourse);
-    courseIDtoSkip.add(i["CourseID"]);
-  }
-
-  //Adds the rest of the courses except the it doesnt add the ones you have taken.
-  bool flag = true;
-  for (var i in dataA) {
-    for (var j in courseIDtoSkip) {
-      if (j == i["CourseID"]) {
-        flag = false;
-      }
-    }
-    if (flag) {
+  for (var i in data) {
+    if (i["Grade"] != "n") {
       Course course = Course(i["CourseID"], i["CourseDept"], i["CourseNum"],
-          i["Name"], i["Institution"], "null", "null", false);
-      allCourses.add(course);
+          i["Name"], i["Intstitution"], i["Grade"], i["Semester"]);
+
+      courses.add(course);
     }
-    flag = true;
   }
 
-  return allCourses;
+  return courses;
 }
+
+////////////////////////////////////////////////////***************************************************PLANNED COURSES */
+class PlannedCourse {
+  final int courseID;
+  final String courseDept;
+  final int courseNum;
+  final String name;
+
+  PlannedCourse(this.courseID, this.courseDept, this.courseNum, this.name);
+}
+
+Future<List<PlannedCourse>> _getPlannedCourses() async {
+  var response = await http.get("$address/myPlannedCoursesW/oSemester",
+      headers: {
+        HttpHeaders.authorizationHeader:
+            "Bearer ${await storage.read(key: "token")}"
+      });
+
+  if (response.statusCode != 200) return null;
+
+  var data = json.decode(response.body);
+
+  List<PlannedCourse> plannedCourses = [];
+
+  for (var i in data) {
+    PlannedCourse plannedCourse = PlannedCourse(
+        i["CourseID"], i["CourseDept"], i["CourseNum"], i["Name"]);
+
+    plannedCourses.add(plannedCourse);
+  }
+
+  return plannedCourses;
+}
+////////////////////////////////////////////////////***************************************************STUDENTINFORMATION COURSES */
 
 class Student {
   final String firstname;
   final String lastname;
   final String email;
-  final String gpa;
+  final double gpa;
   final String catalogyear;
   final String classification;
-  final String hours;
-  final String advancedhours;
-  final String advancedcshours;
+  final int hours;
+  final int advancedhours;
+  final int advancedcshours;
 
   Student(
       this.firstname,
@@ -116,6 +124,39 @@ class Student {
       this.hours,
       this.advancedcshours,
       this.advancedhours);
+}
+
+Future<Student> _getUser() async {
+  var response = await http.get("$address/MyInfo", headers: {
+    HttpHeaders.authorizationHeader:
+        "Bearer ${await storage.read(key: "token")}"
+  });
+
+  if (response.statusCode != 200) return null;
+
+  var data = json.decode(response.body);
+
+  print("return the JSON of info ==> $data");
+
+  String classification = "null";
+
+  if (data["Hours"] < 90) classification = "Junior";
+  if (data["Hours"] < 60) classification = "Sophmore";
+  if (data["Hours"] < 30) classification = "Freshman";
+  if (data["Hours"] > 90) classification = "Senior";
+
+  Student student = Student(
+      data["FirstName"],
+      data["LastName"],
+      data["Email"],
+      data["GPA"],
+      data["CatalogYear"],
+      classification,
+      data["Hours"],
+      data["AdvancedCsHours"],
+      data["AdvancedHours"]);
+
+  return student;
 }
 
 class DegreePageMimic extends StatefulWidget {
@@ -132,89 +173,313 @@ class _DegreePageMimicState extends State<DegreePageMimic> {
 
   @override
   Widget build(BuildContext context) {
-    //StudentInfo();
-    // Future<Map<String, dynamic>> data = CoursesInfo();
+    SizeConfig().init(context);
+    double deviceWidth = SizeConfig.blockSizeHorizontal;
+    double deviceHeight = SizeConfig.blockSizeVertical;
+    return ListView(children: [
+      /////////*****************************************************FRST BOX */
+      Container(
+        //The First container for STUDENT INFORMATION!
+        decoration: BoxDecoration(color: Color(0xff65646a)),
+        child: FutureBuilder(
+          future: _getUser(),
+          builder: (BuildContext context, AsyncSnapshot snapshot) {
+            if (snapshot.data == null) {
+              print("snapshot is null :O");
+              return new Scaffold(
+                backgroundColor: Color(0xff65646a),
+                body: new Center(
+                  child: new Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      Image.asset("assets/images/image0.png"),
+                    ],
+                  ),
+                ),
+              );
+            } else {
+              print("snapshot is not null");
+              return Container(
+                width: deviceWidth * 100,
+                height: deviceHeight * 40,
+                child: Row(
+                  children: <Widget>[
+                    Container(
+                      margin: EdgeInsets.fromLTRB(deviceWidth * 1,
+                          deviceHeight * 4, deviceWidth * 1, deviceHeight * 1),
+                      //color: Color(0xffebebe8),
+                      width: deviceWidth * 98,
+                      height: deviceHeight * 35,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                            colors: [Color(0xffebebe8), Color(0xffebebe8)]),
+                        borderRadius: BorderRadius.circular(6.0),
+                      ),
+                      child: (Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: <Widget>[
+                            RichText(
+                              text: TextSpan(
+                                style: TextStyle(
+                                    color: Color(0xffcf4411),
+                                    fontWeight: FontWeight.bold,
+                                    height: deviceHeight * 0.2,
+                                    fontSize: deviceHeight * 2.28),
+                                children: <TextSpan>[
+                                  TextSpan(
+                                    text: 'Student Name: ',
+                                    style: TextStyle(
+                                        color: Colors.black.withOpacity(0.5)),
+                                  ),
+                                  TextSpan(
+                                    text:
+                                        '${snapshot.data.firstname} ${snapshot.data.lastname}\n',
+                                    style: TextStyle(
+                                        color: Colors.black.withOpacity(1.0)),
+                                  ),
+                                  TextSpan(
+                                    text: 'GPA: ',
+                                    style: TextStyle(
+                                        color: Colors.black.withOpacity(0.5)),
+                                  ),
+                                  TextSpan(
+                                    text: '${snapshot.data.gpa}\n',
+                                    style: TextStyle(
+                                        color: Colors.black.withOpacity(1.0)),
+                                  ),
+                                  TextSpan(
+                                    text: '\nCatalog Year: ',
+                                    style: TextStyle(
+                                        color: Colors.black.withOpacity(0.5)),
+                                  ),
+                                  TextSpan(
+                                    text: '${snapshot.data.catalogyear}\n',
+                                    style: TextStyle(
+                                        color: Colors.black.withOpacity(1.0)),
+                                  ),
+                                  TextSpan(
+                                    text: 'Classification: ',
+                                    style: TextStyle(
+                                        color: Colors.black.withOpacity(0.5)),
+                                  ),
+                                  TextSpan(
+                                    text: '${snapshot.data.classification}\n',
+                                    style: TextStyle(
+                                        color: Colors.black.withOpacity(1.0)),
+                                  ),
+                                  TextSpan(
+                                    text: '\nTotal Hours:               ',
+                                    style: TextStyle(
+                                        color: Colors.black.withOpacity(0.5)),
+                                  ),
+                                  TextSpan(
+                                    text: '${snapshot.data.hours}\n',
+                                    style: TextStyle(
+                                        color: Colors.black.withOpacity(1.0)),
+                                  ),
+                                  TextSpan(
+                                    text: 'Advanced Hours:      ',
+                                    style: TextStyle(
+                                        color: Colors.black.withOpacity(0.5)),
+                                  ),
+                                  TextSpan(
+                                    text: '${snapshot.data.advancedhours}\n',
+                                    style: TextStyle(
+                                        color: Colors.black.withOpacity(1.0)),
+                                  ),
+                                  TextSpan(
+                                    text: 'Advanced cs Hours  ',
+                                    style: TextStyle(
+                                        color: Colors.black.withOpacity(0.5)),
+                                  ),
+                                  TextSpan(
+                                    text: '${snapshot.data.advancedcshours}\n',
+                                    style: TextStyle(
+                                        color: Colors.black.withOpacity(1.0)),
+                                  ),
+                                ],
+                              ),
+                            ),
 
-    // print(data);
-    //need a future builder
-    return new FutureBuilder(
-      future: _getCourses(),
-      builder: (BuildContext context, AsyncSnapshot snapshot) {
-        if (snapshot.data == null) {
-          print("snapshot is null :O");
-          return new Scaffold(
-            backgroundColor: Color(0xff65646a),
-            body: new Center(
-              child: new Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  Image.asset("assets/images/image0.png"),
-                ],
-              ),
-            ),
-          );
-        } else {
-          print("snapshot is not null");
-          return Scaffold(
-            backgroundColor: Color(0xff65646a),
-            body: Text("hi"),
-          );
-        }
-      },
-    );
-  }
-}
-
-class PopUpAdd extends StatefulWidget {
-  @override
-  final String message;
-  const PopUpAdd({Key key, this.message}) : super(key: key);
-
-  State<StatefulWidget> createState() => PopUpAddState();
-}
-
-class PopUpAddState extends State<PopUpAdd>
-    with SingleTickerProviderStateMixin {
-  AnimationController controller;
-  Animation<double> scaleAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-
-    controller =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 450));
-    scaleAnimation =
-        CurvedAnimation(parent: controller, curve: Curves.elasticInOut);
-
-    controller.addListener(() {
-      setState(() {});
-    });
-
-    controller.forward();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Material(
-        color: Colors.transparent,
-        child: ScaleTransition(
-          scale: scaleAnimation,
-          child: Container(
-            decoration: ShapeDecoration(
-                color: Colors.white,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15.0))),
-            child: Padding(
-              padding: const EdgeInsets.all(50.0),
-              child: Text(widget.message),
-            ),
-          ),
+                            ///Here
+                          ])),
+                    ),
+                  ],
+                ),
+              );
+            }
+          },
         ),
       ),
-    );
+      //*************************************************************************SECOND BOX */
+      Container(
+        //The SECOND CONTAINER FOR PLLANED COURSES
+        decoration: BoxDecoration(color: Color(0xff65646a)),
+        child: FutureBuilder(
+          future: _getPlannedCourses(),
+          builder: (BuildContext context, AsyncSnapshot snapshot) {
+            if (snapshot.data == null) {
+              print("snapshot is null :O");
+              return new Scaffold(
+                backgroundColor: Color(0xff65646a),
+                body: new Center(
+                  child: new Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      Image.asset("assets/images/image0.png"),
+                    ],
+                  ),
+                ),
+              );
+            } else {
+              print("snapshot is not null");
+              return Container(
+                width: deviceWidth * 100,
+                height: deviceHeight * 40,
+                child: Row(
+                  children: <Widget>[
+                    Container(
+                      margin: EdgeInsets.fromLTRB(deviceWidth * 1,
+                          deviceHeight * 1, deviceWidth * 1, deviceHeight * 1),
+                      //color: Color(0xffebebe8),
+                      width: deviceWidth * 98,
+                      height: deviceHeight * 35,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                            colors: [Color(0xffebebe8), Color(0xffebebe8)]),
+                        borderRadius: BorderRadius.circular(6.0),
+                      ),
+                      child: ListView(
+                        children: <Widget>[
+                          Row(
+                            children: <Widget>[
+                              RichText(
+                                text: TextSpan(
+                                    style: TextStyle(
+                                        color: Color(0xffcf4411),
+                                        fontWeight: FontWeight.bold,
+                                        height: deviceHeight * 0.2,
+                                        fontSize: deviceHeight * 2.0),
+                                    children: <TextSpan>[
+                                      TextSpan(
+                                        text:
+                                            "C - Supported Courses 32 HOURS (12 Advanced)",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color:
+                                                Colors.black.withOpacity(1.0)),
+                                      ),
+                                    ]),
+                              )
+                            ],
+                          ),
+                          Row(
+                            children: <Widget>[
+                              RichText(
+                                text: TextSpan(
+                                    style: TextStyle(
+                                        //color: Color(0xffcf4411),
+                                        fontWeight: FontWeight.bold,
+                                        height: deviceHeight * 0.2,
+                                        fontSize: deviceHeight * 1.5),
+                                    children: <TextSpan>[
+                                      TextSpan(
+                                        text:
+                                            "1 - Oral and Written Communication - 3 hours (3 Advanced)",
+                                        style: TextStyle(
+                                            //fontWeight: FontWeight.bold,
+                                            color:
+                                                Colors.black.withOpacity(1.0)),
+                                      ),
+                                    ]),
+                              )
+                            ],
+                          ),
+                          Card(
+                            color: Color(0xffebebe8),
+                            child: ListTile(
+                              //leading: FlutterLogo(size: 56.0),
+                              title: Text('Technical Communication'),
+                              subtitle: Text('ENGL 3342'),
+                              //trailing: Icon(Icons.more_vert),
+                            ),
+                          ),
+                          Row(
+                            children: <Widget>[
+                              RichText(
+                                text: TextSpan(
+                                    style: TextStyle(
+                                        //color: Color(0xffcf4411),
+                                        fontWeight: FontWeight.bold,
+                                        height: deviceHeight * 0.2,
+                                        fontSize: deviceHeight * 1.5),
+                                    children: <TextSpan>[
+                                      TextSpan(
+                                        text:
+                                            "Matheematics and Engineering - 15 Hours 3 advanced",
+                                        style: TextStyle(
+                                            //fontWeight: FontWeight.bold,
+                                            color:
+                                                Colors.black.withOpacity(1.0)),
+                                      ),
+                                    ]),
+                              )
+                            ],
+                          ),
+                          Card(
+                            color: Color(0xffebebe8),
+                            child: ListTile(
+                              //leading: FlutterLogo(size: 56.0),
+                              title: Text('Digital Systems Engineering I Lab'),
+                              subtitle: Text('ELEE 2130'),
+
+                              //trailing: Icon(Icons.more_vert),
+                            ),
+                          ),
+                          Card(
+                            color: Color(0xffebebe8),
+                            child: ListTile(
+                              //leading: FlutterLogo(size: 56.0),
+                              title: Text('Digital Systems Engineering I'),
+                              subtitle: Text('ELEE 2330'),
+                              //trailing: Icon(Icons.more_vert),
+                              onTap: () async {
+                                await storage.write(
+                                    key: "CourseSelected",
+                                    value: "Digital Systems Engineering I");
+                                print(
+                                    await storage.read(key: "CourseSelected"));
+                                showDialog(
+                                  context: context,
+                                  builder: (_) => EditPopUp(),
+                                );
+                              },
+                            ),
+                          ),
+                          Card(
+                            color: Color(0xffebebe8),
+                            child: ListTile(
+                              //leading: FlutterLogo(size: 56.0),
+                              title: Text('Linear Algebra'),
+                              subtitle: Text('MATH 2318'),
+                              //trailing: Icon(Icons.more_vert),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+          },
+        ),
+      ),
+      //*************************************************************************THIRD BOX */
+    ]);
   }
 }
 
@@ -244,3 +509,99 @@ class PopUpAddState extends State<PopUpAdd>
 //                 );
 //               },
 //             ),
+
+class EditPopUp extends StatefulWidget {
+  @override
+  String message = "hi";
+
+  State<StatefulWidget> createState() => EditPopUpState();
+}
+
+class EditPopUpState extends State<EditPopUp>
+    with SingleTickerProviderStateMixin {
+  AnimationController controller;
+  Animation<double> scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    controller =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 450));
+    scaleAnimation =
+        CurvedAnimation(parent: controller, curve: Curves.elasticInOut);
+
+    controller.addListener(() {
+      setState(() {});
+    });
+
+    controller.forward();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    SizeConfig().init(context);
+    double deviceWidth = SizeConfig.blockSizeHorizontal;
+    double deviceHeight = SizeConfig.blockSizeVertical;
+    String dropdownValueForGrade = 'A';
+    String dropDownValueForSemester = "Fall";
+    String newValueForGrade= 'null';
+    return Center(
+      child: Material(
+        color: Colors.transparent,
+        child: ScaleTransition(
+          scale: scaleAnimation,
+          child: Container(
+            width: deviceWidth * 95,
+            height: deviceHeight * 40,
+            decoration: ShapeDecoration(
+                color: Colors.white,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15.0))),
+            child: ListView(
+              children: <Widget>[
+                RichText(
+                  text: TextSpan(
+                    style: TextStyle(
+                        color: Color(0xffcf4411),
+                        fontWeight: FontWeight.bold,
+                        height: deviceHeight * 0.2,
+                        fontSize: deviceHeight * 2.28),
+                    children: <TextSpan>[
+                      TextSpan(
+                        text: 'Letter Grade:',
+                        style: TextStyle(color: Colors.black.withOpacity(0.5)),
+                      )
+                    ],
+                  ),
+                ),
+                DropdownButton<String>(
+                  value: dropdownValueForGrade,
+                  icon: Icon(Icons.arrow_downward),
+                  iconSize: 24,
+                  elevation: 16,
+                  style: TextStyle(color: Colors.black),
+                  onChanged: (newValueForGrade) {
+                    setState(() async {
+                      dropdownValueForGrade = newValueForGrade;
+                      await storage.write(
+                          key: "CourseGrade", value: "$newValueForGrade");
+                      print(await storage.read(key: "CourseGrade"));
+                    });
+                  },
+                  items: <String>['A', 'B', 'C', 'D', 'F', 'W', 'DR', 'P', 'NP']
+                      .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
