@@ -132,6 +132,12 @@ Future<Student> _getUser() async {
 
   print("return the JSON of info ==> $data");
 
+  String classification = "null";
+  if (data["Hours"] < 90) classification = "Junior";
+  if (data["Hours"] < 60) classification = "Sophmore";
+  if (data["Hours"] < 30) classification = "Freshman";
+  if (data["Hours"] > 90) classification = "Senior";
+
   Student student = Student(
       data["FirstName"],
       data["LastName"],

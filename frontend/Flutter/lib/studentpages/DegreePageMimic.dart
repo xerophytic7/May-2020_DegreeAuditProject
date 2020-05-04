@@ -61,6 +61,7 @@ Future<List<Course>> _getCourses() async {
   );
   if (responseB.statusCode != 200) return null;
 
+  
   var dataA = json.decode(responseA.body);
   var dataB = json.decode(responseB.body);
 

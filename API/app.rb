@@ -1120,18 +1120,158 @@ end
 
     if userid
       u = PlannedFutureCourses.all(UserID: userid) 
-      u ? (halt 200, u.to_json) : (halt 400, {'message': 'User has no planned courses for selected semester'}.to_json)
+      u.size > 0 ? (halt 200, u.to_json) : (halt 400, {'message': 'User has no planned courses for selected semester'}.to_json)
 
     elsif email
       u = User.first(Email: email)
       if u
         list = PlannedFutureCourses.all(UserID: u.id)
-        list ? (halt 200, list.to_json) : (halt 400, {'message': 'User has no planned courses for selected semester'}.to_json)
+        list.size > 0 ? (halt 200, list.to_json) : (halt 400, {'message': 'User has no planned courses for selected semester'}.to_json)
       
       else
         halt 400, {'message': 'User not found'}.to_json
       end
     else
       halt 400, {'message': 'Missing paramaters'}.to_json
+    end
+  end
+
+      # Returns current users courses from StudentCourses
+      get '/myCourses' do
+
+        email = params['Email']
+        api_authenticate!
+    
+        courses = StudentCourses.all(UserID: current_user.id)
+        table = Array.new {Hash.new}
+        courses.each do |i|
+          
+          #We already have the CourseID, but this Will also get the dept, num, and name
+          course = AllCourses.first(CourseID: i.CourseID)
+    
+          if course
+            table << {
+              'CourseID'    => course.CourseID,
+              'CourseDept'  => course.CourseDept,
+              'CourseNum'   => course.CourseNum,
+              'Name'        => course.Name,
+              'Semester'    => i.Semester,
+              'Grade'       => i.Grade,
+              'Institution' => course.Institution,
+            }
+          end
+        end
+        halt 200, table.to_json if table.size != 0
+        halt 400, {'message': 'User has no courses'}.to_json
+      end
+
+        # MERGE myCourses with AllCourses, remove ones with grades. Admin and student usable.
+  # params: StudentID or Email will be for admin
+  # no params, will return current_user courses.
+  get '/MyAndAllCourses' do
+    api_authenticate!
+
+    email = params['Email'] if params['Email']
+    userid = params['StudentID'] if params['StudentID']
+
+    results = Array.new {Hash.new}
+
+    if email
+      halt 401, {'message': 'Unauthorized User'}.to_json if !current_user.admin 
+
+      student = User.first(email: email)
+      halt 400, {'message': 'User not found'}.to_json if !student
+      ac = AllCourses.all
+
+      ac.each do |i|
+        sc = StudentCourses.first(UserID: student.id, CourseID: i.CourseID)
+        if sc 
+          results << {
+            'CourseID'      => i.CourseID,
+            'CourseDept'    => i.CourseDept,
+            'CourseNum'     => i.CourseNum,
+            'Name'          => i.Name,
+            'Institution'   => i.Institution,
+            'Semester'      => sc.Semester,
+            'Grade'         => sc.Grade,
+          }
+        else
+          results << {
+            'CourseID'      => i.CourseID,
+            'CourseDept'    => i.CourseDept,
+            'CourseNum'     => i.CourseNum,
+            'Name'          => i.Name,
+            'Institution'   => i.Institution,
+            'Semester'      => 'n',
+            'Grade'         => 'n',
+          }
+        end
+      end
+      halt 200, results.to_json
+    elsif userid
+      halt 401, {'message': 'Unauthorized User'}.to_json if !current_user.admin
+
+      student = User.first(id: userid)
+      halt 400, {'message': 'User not found'}.to_json if !student
+      ac = AllCourses.all
+
+      ac.each do |i|
+        sc = StudentCourses.first(UserID: student.id, CourseID: i.CourseID)
+        if sc 
+          results << {
+            'CourseID'      => i.CourseID,
+            'CourseDept'    => i.CourseDept,
+            'CourseNum'     => i.CourseNum,
+            'Name'          => i.Name,
+            'Institution'   => i.Institution,
+            'Semester'      => sc.Semester,
+            'Grade'         => sc.Grade,
+          }
+        else
+          results << {
+            'CourseID'      => i.CourseID,
+            'CourseDept'    => i.CourseDept,
+            'CourseNum'     => i.CourseNum,
+            'Name'          => i.Name,
+            'Institution'   => i.Institution,
+            'Semester'      => 'n',
+            'Grade'         => 'n',
+          }
+        end
+      end
+      halt 200, results.to_json
+
+    else
+      #s_courses = StudentCourses.all(UserID: current_user.id)
+      ac = AllCourses.all
+
+      ac.each do |i|
+        sc = StudentCourses.first(UserID: current_user.id, CourseID: i.CourseID)
+        if sc
+          results << {
+            'CourseID'      => i.CourseID,
+            'CourseDept'    => i.CourseDept,
+            'CourseNum'     => i.CourseNum,
+            'Name'          => i.Name,
+            'Institution'   => i.Institution,
+            'Semester'      => sc.Semester,
+            'Grade'         => sc.Grade,
+          }
+        else
+          results << {
+            'CourseID'      => i.CourseID,
+            'CourseDept'    => i.CourseDept,
+            'CourseNum'     => i.CourseNum,
+            'Name'          => i.Name,
+            'Institution'   => i.Institution,
+            'Semester'      => 'n',
+            'Grade'         => 'n',
+          }
+        end
+      end
+
+      halt 200, results.to_json
+
+
     end
   end
