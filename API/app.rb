@@ -1275,3 +1275,80 @@ end
 
     end
   end
+
+
+## Courses by Dept Hug0
+
+
+get "/Allcourses/ByDept" do
+    api_authenticate!
+    params["CourseDept"] ? Dept = params["CourseDept"] : (halt 400, {"message": "Missing Parameters"}.to_json)
+    halt 200, AllCourses.all(CourseDept: Dept).to_json
+  end
+
+  get "/usercourses/ByDept" do
+  api_authenticate!
+  userid = params["id"] if params["id"]
+  params["CourseDept"] ? Dept = params["CourseDept"] : (halt 400, {"message": "Missing Parameters"}.to_json)
+  if userID
+      sc = StudentCourses.all(UserID: userid)
+      Courses = Array.new {Hash.new}
+      sc.each do |i|
+        
+        course = AllCourses.first(CourseID: i.CourseID, CourseDept: Dept)
+  
+        if course
+          Courses << course
+        end
+      end
+      halt 200, Courses.to_json if Courses.size != 0
+      halt 400, {'message': 'User has no courses in this department'}.to_json
+  else
+     sc = StudentCourses.all(UserID: current_user.id)
+      Courses = Array.new {Hash.new}
+      sc.each do |i|
+        
+        course = AllCourses.first(CourseID: i.CourseID, CourseDept: Dept)
+  
+        if course
+          Courses << course
+        end
+      end
+      halt 200, Courses.to_json if Courses.size != 0
+      halt 400, {'message': 'User has no courses in this department'}.to_json
+  end
+end
+
+ get "/plannedUsercourses/ByDept" do
+  api_authenticate!
+  userid = params["id"] if params["id"]
+  params["CourseDept"] ? Dept = params["CourseDept"] : (halt 400, {"message": "Missing Parameters"}.to_json)
+  if userID
+      pfc = PlannedFutureCourses.all(UserID: userid)
+      Courses = Array.new {Hash.new}
+      pfc.each do |i|
+        
+        
+        course = AllCourses.first(CourseID: i.CourseID, CourseDept: Dept)
+  
+        if course
+          Courses << course
+        end
+      end
+      halt 200, Courses.to_json if Courses.size != 0
+      halt 400, {'message': 'User has no courses in this department'}.to_json
+  else
+     pfc = PlannedFutureCourses.all(UserID: current_user.id)
+      Courses = Array.new {Hash.new}
+      pfc.each do |i|
+        
+        course = AllCourses.first(CourseID: i.CourseID, CourseDept: Dept)
+  
+        if course
+          Courses << course
+        end
+      end
+      halt 200, Courses.to_json if Courses.size != 0
+      halt 400, {'message': 'User has no courses in this department'}.to_json
+  end
+end
