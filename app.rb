@@ -143,6 +143,21 @@ end
 #CHECKS IF GIVEN COURSEID CATALOG YEAR MATCHES GIVEN USERID CATALOG YEAR
 #RETURNS TRUE IF MATCH, OR IF COURSE HAS NO CATALOG YEAR
 #RETURNS FALSE IF COURSE IS PART OF DIFFERENT CATALOG YEAR
+
+class String
+  def titleize
+    phrase = self.split(" ").map {|i|
+      i.capitalize
+    }.join(" ")
+    phrase
+  end
+  
+end
+
+s = "lemme test this real quick 2001 never forget."
+
+puts s.titleize
+
 def same_catalog_year courseid, userid
   cats = CourseCategories.all(CourseID: courseid)
   if cats
@@ -195,8 +210,8 @@ end
     params["Institution"] ? (institution = params["Institution"]) : (halt 400, {"message": "Missing Paramaters"}.to_json)
 
     #*********** DUPLICATE CHECK ***************
-    halt 409, {'message': 'Duplicate Entry'}.to_json if AllCourses.first(CourseDept: courseDept, 
-      CourseNum: CourseNum, Name: name, Institution: institution)
+    halt 409, {'message': 'Duplicate Entry'}.to_json if AllCourses.first(CourseDept: courseDept.upcase, 
+      CourseNum: CourseNum, Name: name.titleize, Institution: institution.upcase)
 
     if !is_number?(CourseNum)
       halt 400, {'message': 'Course Number must be an integer'}.to_json
@@ -206,7 +221,7 @@ end
       c.CourseDept = courseDept.upcase
       c.CourseNum = CourseNum
       c.Name = name.titleize
-      c.Institution = institution.titleize
+      c.Institution = institution.upcase
       c.save
 
       halt 200, {"message": "Successfully added course to AllCourses Table"}.to_json
@@ -237,6 +252,7 @@ end
     if !is_number?(courseid)
       halt 400, {'message': 'CourseID param not an integer'}.to_json
     end
+    halt 400, {'message': 'Course not found'}.to_json if !AllCourses.get(courseid)
 
     if courseid != '' && semester != '' && grade != ''
       if userid
@@ -286,13 +302,35 @@ end
     end
   end
   
+
+  # Create Advising session, given param: StudentID
+  # optional params: Notes
+  post '/create/AdvisingSesh' do
+    api_authenticate!
+    halt 400, {'message': 'Unauthorized User'}.to_json if !current_user.admin
+    params['StudentID'] ? (sid = params['StudentID']) : (halt 400, {'message': 'Missing paramater'}.to_json)
+    student = User.get(sid) 
+    if student
+      as = AdvisementSession.new
+      as.AdminID = current_user.id
+      as.StudentID = sid
+      as.Notes = params['Notes'] if params['Notes']
+      as.save
+      halt 200, as.to_json
+    else
+      halt 400, {'message': 'student not found'}.to_json
+    end
+  end
+
+
   # Create entries to PlannedFutureCourses given JSON list of courses, 
-  # list of courses should have AdvisementID, CourseID and Semester. 
+  # list of courses should have AdvisementID, courseID and semester. 
   post '/add/PlannedCourses' do
     api_authenticate!
     params.each do |i|
       halt 400, {"message": "Missing paramaters, or possible typo."}.to_json if !i[0]['Courses']
     end
+    
     plannedCourses = params[:Courses]
     x = 1
     plannedCourses.each do |i|
@@ -302,13 +340,13 @@ end
       if !AllCourses.get(i[1]["courseID"])
         halt 404, {'message': "Course number #{x} on your list was not found, no courses were added to planned courses"}.to_json
       end
-      if !AdvisementSession.get(i[i]['advisementID'])
+      if !AdvisementSession.get(i[1]["advisementID"])
         aID = i[1]['advisementID']
         halt 404, {'message': "AdvisementID: #{aID} (number #{x} on your list) was not found in AdvisementSession table."}.to_json
       end
 
       # DUPLICATE ENTRY CHECK
-      if PlannedFutureCourses.first(UserID: current_user.id, CourseID: i[1]["courseID"], Semester: i[1]["semester"])
+      if PlannedFutureCourses.first(UserID: current_user.id, CourseID: i[1]["courseID"], Semester: i[1]["semester"].titleize)
         halt 409, {'message': 'Duplicate Entry'}.to_json
       end
 
@@ -485,7 +523,7 @@ end
       cats.each do |i|
 
         if !CatalogYears.first(CatalogYear: i[1]['CatalogYear'].titleize)
-          yr = CatalogYear.new
+          yr = CatalogYears.new
           yr.CatalogYear = i[1]['CatalogYear'].titleize
           yr.save
         end
@@ -817,7 +855,7 @@ end
     params['semester'] ? (semester = params['semester']) : (halt 400, {'message': 'Missing paramaters'}.to_json)
     if current_user.admin
       pfc = PlannedFutureCourses.all(Semester: semester)
-      halt 200, pfc.to_json
+      pfc.size > 0 ? (halt 200, pfc.to_json) : (halt 400, {'message': "No students have planned any courses for the #{semester} semester"}.to_json)
       
     else
       halt 401, {'message': 'Unauthorized User'}.to_json
