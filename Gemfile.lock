@@ -130,6 +130,7 @@ GEM
     stringex (1.5.1)
     thread_safe (0.3.6)
     tilt (2.0.9)
+    titleize (1.4.1)
     tzinfo (1.2.5)
       thread_safe (~> 0.1)
     uuidtools (2.1.5)
@@ -152,6 +153,7 @@ DEPENDENCIES
   sinatra
   sinatra-namespace
   sqlite3-ruby
+  titleize
 
 BUNDLED WITH
    2.1.4
