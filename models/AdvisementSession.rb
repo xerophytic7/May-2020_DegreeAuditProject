@@ -4,9 +4,9 @@ class AdvisementSession
   include DataMapper::Resource
 
   property :id, Serial
-  property :AdminID, Integer, :key=> true
-  property :StudentID, Integer, :key=> true
-  property :Date, Date
+  property :AdminID, Integer 
+  property :StudentID, Integer 
+  property :created_at, Date
   property :Notes, Text
 
 end 
