@@ -10,7 +10,7 @@ class StudentCourses
   property :Semester, String,   :key => true
   property :Grade, String
   property :Approved, Boolean, :default => true
-  property :Notes, String
+  property :Notes, Text
 
   #belongs_to :User
 end
