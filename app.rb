@@ -154,10 +154,6 @@ class String
   
 end
 
-s = "lemme test this real quick 2001 never forget."
-
-puts s.titleize
-
 def same_catalog_year courseid, userid
   cats = CourseCategories.all(CourseID: courseid)
   if cats
@@ -175,6 +171,7 @@ def same_catalog_year courseid, userid
     return true
   end
 end
+
 #IN CASE WE NEED TO CHECK IF GIVEN SEMESTER IS VALID
 semesters = ["fall", "spring", "summer i", "summer ii"]
 def valid_semester semester
@@ -198,25 +195,30 @@ end
 
 ############## CREATE ################
 
-  # Create Courses given params CourseDept, CourseNum, Name, and Institution
+  # Create Courses in AllCourses table given params CourseDept, CourseNum, Name, and Institution
   post '/add/Course' do
     api_authenticate!
+
+    # check user is admin
     if !current_user.admin
       halt 401, {"message": "Unauthorized user"}.to_json
     end
+    # check params are included
     params["CourseDept"] ? (courseDept = params["CourseDept"]) : (halt 400, {"message": "Missing Paramaters"}.to_json)
     params["CourseNum"] ? (CourseNum = params["CourseNum"]) : (halt 400, {"message": "Missing Paramaters"}.to_json)
     params["Name"] ? (name = params["Name"]) : (halt 400, {"message": "Missing Paramaters"}.to_json)
     params["Institution"] ? (institution = params["Institution"]) : (halt 400, {"message": "Missing Paramaters"}.to_json)
 
-    #*********** DUPLICATE CHECK ***************
+    # *********** DUPLICATE CHECK ***************
     halt 409, {'message': 'Duplicate Entry'}.to_json if AllCourses.first(CourseDept: courseDept.upcase, 
       CourseNum: CourseNum, Name: name.titleize, Institution: institution.upcase)
-
+    # Check correct format of CourseNum
     if !is_number?(CourseNum)
       halt 400, {'message': 'Course Number must be an integer'}.to_json
     end
+    # Make sure params aren't empty strings
     if courseDept != '' && CourseNum != '' && name != '' && institution != ''
+      # Saving entry to database
       c = AllCourses.new
       c.CourseDept = courseDept.upcase
       c.CourseNum = CourseNum
@@ -226,6 +228,7 @@ end
 
       halt 200, {"message": "Successfully added course to AllCourses Table"}.to_json
     else
+      # Error if params are empty strings
       halt 400, {"message": "Paramaters can't be empty strings"}.to_json
     end
 
@@ -233,13 +236,17 @@ end
   
   # Create Users Given Email, FirstName, LastName, Password, and admin (true/false).
   #******************ALREADY IMPLEMENTED IN api_authentication.rb******************
-  
-
-### MOTIVATION, CHALLENGE, HOW WORK WAS SPLIT UP, POSSIBLE QUESTIONS
 
   
   # Create entry to StudentCourses using current UserID
   # (Depending on params given)
+  # If UserID param is given, checks logged in user is admin, else it'll assign course to current user
+  # requires CourseID, Semester, and Grade params. params Notes, and Approved are optional
+  
+  # ************************************************************************************************************
+  # ************************ ADD A CHECK TO VERIFY GRADE AND SEMESTER ARE PROPER SYNTAX ************************
+  # ********* EXAMPLE: GRADE SHOULD BE A, B, C, D, F, AND THE OTHER VARIETIES SUCH AS DROP AND WHATNOT *********
+  # ************************************************************************************************************
   post '/add/StudentCourses' do
     
     api_authenticate!
@@ -248,6 +255,7 @@ end
     params["Semester"] ? (semester = params['Semester']): (halt 400, {"message": "Missing Semester paramater"}.to_json)
     params["Grade"] ? (grade = params['Grade']): (halt 400, {"message": "Missing Grade paramater"}.to_json)
     notes = params['Notes']
+    approved = params['Approved']
 
     if !is_number?(courseid)
       halt 400, {'message': 'CourseID param not an integer'}.to_json
@@ -255,7 +263,9 @@ end
     halt 400, {'message': 'Course not found'}.to_json if !AllCourses.get(courseid)
 
     if courseid != '' && semester != '' && grade != ''
+      # If UserID is provided, that means an admin is adding a course for a student.
       if userid
+        # Verifying logged in user is admin
         if current_user.admin
 
           #*************** DUPLICATE CHECK *************
@@ -273,19 +283,22 @@ end
           if notes != nil
             c.Notes = notes 
           end
+          if approved != nil
+            approved.downcase == "true" ? (c.approved = true) : (c.approved = false)
+          end
           c.save
           halt 201, {"message": "Course added successfully"}.to_json
         else
+          # Error if user isn't an admin
           halt 401, {"message": "Unauthorized user"}.to_json
         end
+
+      # Else, course is added to current logged in user  
       else
          #*************** DUPLICATE CHECK *************
          halt 409, {'message': 'Duplicate Entry'}.to_json if StudentCourses.first(UserID: current_user.id, CourseID: courseid)
          #************************************************
 
-        # I COULD CHECK IF COURSE CATALOG YEAR MATCHES USER CATALOG YEAR
-        # i.f same_catalog_year(courseid, current_user.id)
-        # BUT NOT SURE WHY WE'D NEED THIS CHECK HERE
         c = StudentCourses.new
         c.UserID = current_user.id
         c.CourseID = courseid
@@ -293,6 +306,9 @@ end
         c.Grade = grade.upcase
         if notes != nil
           c.Notes = notes
+        end
+        if approved != nil
+          approved.downcase == "true" ? (c.approved = true) : (c.approved = false)
         end
         c.save
         halt 201, {"message": "Course added successfully"}.to_json
@@ -307,8 +323,14 @@ end
   # optional params: Notes
   post '/create/AdvisingSesh' do
     api_authenticate!
+
+    # Error if user isn't an admin
     halt 400, {'message': 'Unauthorized User'}.to_json if !current_user.admin
+
+    # Check proper param is passed
     params['StudentID'] ? (sid = params['StudentID']) : (halt 400, {'message': 'Missing paramater'}.to_json)
+
+    # Make sure student exists, then create entry to AdvisementSession table
     student = User.get(sid) 
     if student
       as = AdvisementSession.new
@@ -318,49 +340,74 @@ end
       as.save
       halt 200, as.to_json
     else
+      # Error if student isn't found in User table
       halt 400, {'message': 'student not found'}.to_json
     end
   end
 
 
-  # Create entries to PlannedFutureCourses given JSON list of courses, 
+  # Create entries to PlannedFutureCourses given encoded JSON list of courses
+  # List should be called 'Courses'
   # list of courses should have AdvisementID, courseID and semester. 
+  # Example: 
+=begin
+
+  key:                          value:
+  Courses[0][courseID]          1
+  Courses[0][semester]          Fall 2020
+  Courses[0][advisementID]      1
+  Courses[1][courseID]          2
+  Courses[1][semester]          Fall 2020
+  Courses[1][advisementID]      1
+
+=end
   post '/add/PlannedCourses' do
     api_authenticate!
+
+    # Make sure every param is properly labeled
     params.each do |i|
       halt 400, {"message": "Missing paramaters, or possible typo."}.to_json if !i[0]['Courses']
     end
     
     plannedCourses = params[:Courses]
+    # Counter variable
     x = 1
+
+    # Various checks
     plannedCourses.each do |i|
+      # Make sure params exist
       if !i[1]["courseID"] || !i[1]["semester"] || !i[1]['advisementID']
         halt 400, {"message": "Missing paramaters, or possible typo"}.to_json
       end
+      # Make sure CourseID exists
       if !AllCourses.get(i[1]["courseID"])
         halt 404, {'message': "Course number #{x} on your list was not found, no courses were added to planned courses"}.to_json
       end
+      # Make sure advisementID exists
       if !AdvisementSession.get(i[1]["advisementID"])
         aID = i[1]['advisementID']
         halt 404, {'message': "AdvisementID: #{aID} (number #{x} on your list) was not found in AdvisementSession table."}.to_json
       end
-
       # DUPLICATE ENTRY CHECK
       if PlannedFutureCourses.first(UserID: current_user.id, CourseID: i[1]["courseID"], Semester: i[1]["semester"].titleize)
         halt 409, {'message': 'Duplicate Entry'}.to_json
       end
-
-      if is_number?(i[1]["courseID"]) && i[1]["semester"] != ''
+      # Make sure semester isn't an empty string
+      if i[1]["semester"] != ''
         # i.f valid_semester(i[1]['semester'])    Checks semester matches spring, fall, summer i, or summer ii
+        # Update Counter
         x = x + 1
+        # goto next iteration of the loop
         next
       else
-        halt 400, {"message": "CourseID has to be integer, and neither paramater can be an empty string"}.to_json
+        # Empty string error
+        halt 400, {"message": "Params can't be empty strings"}.to_json
       end
 
       #counter update
       x = x + 1 
     end
+    # After verifying the whole list is valid, add every entry to database
     plannedCourses.each do |i|
       #puts i[1]["courseID"]    #puts i[1]["semester"]
       p = PlannedFutureCourses.new
@@ -375,6 +422,7 @@ end
   end
   
   # Create a Category Given MainCategory, CategoryNum, Name, CatalogYear, ReqHours, and AdvHours(0 if none required)
+  # must be admin
   post '/add/Category' do
     api_authenticate!
     if current_user.admin
