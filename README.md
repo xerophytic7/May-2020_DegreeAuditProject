@@ -8,6 +8,7 @@
   The project was broken down into two main components, the api and the frontend. This was done so that the project was not limited to one website or one mobile app. The implementation with an api allowed for any developer working on this project to use the framework they are most comfortable with and allowed for variety for the end user. This way users can install the app if they want more features than just a browser but are not limited to a mobile app if they don’t want to install one.
   
   
-  [Project Video Presentation](https://https://youtu.be/bBCdan-le3w)
+[Project Video Presentation](https://youtu.be/dAeWbiZansg)
+[Alternate Link](https://youtu.be/bBCdan-le3w)
   
-  [Demo - Some API Functionalities](https://youtu.be/Wvi8UhSzEhE)
+[Demo - Some API Functionalities](https://youtu.be/Wvi8UhSzEhE)
